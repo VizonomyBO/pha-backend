@@ -1,5 +1,7 @@
+import 'dotenv/config';
 import * as express from 'express';
 import { Request, Response } from 'express';
+import storageRouter from './routes/storage.route';
 
 const app = express();
 
@@ -11,3 +13,5 @@ const port = 9000;
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
+
+app.use('/storage', storageRouter);
