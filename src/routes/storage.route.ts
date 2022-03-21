@@ -17,6 +17,10 @@ const multer = Multer({
 });
 const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
 
+const getPublicURL = (bucketname: string, filename: string): string => {
+  return `https://storage.googleapis.com/${bucketname}/${filename}`;
+}
+
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
 });
@@ -42,7 +46,7 @@ router.post('/', multer.single('file'), async (req: Request & { file: MulterFile
   });
 
   blobStream.on('finish', () => {
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+    const publicUrl = getPublicURL(bucket.name, blob.name);
     blob.makePublic().then(() => {
       console.info(`Successfully uploaded to ${publicUrl}`);
       res.status(200).send({url: publicUrl, success: true});
