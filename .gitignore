@@ -9,9 +9,10 @@ dist
 # Coveralls
 .nyc_output
 coverage
-
+.env
 # Benchmarking
 benchmarks/graphs
+iam.json
 
 # ignore additional files using core.excludesFile
 # https://git-scm.com/docs/gitignore
