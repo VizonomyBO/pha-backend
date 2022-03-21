@@ -45,18 +45,13 @@ router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction)
       console.error(err);
       res.status(400).send({ error: 'Invalid file type', success: false });
       return;
-    } else {
+    } else if (err) {
       res.status(500).send({ error: err, success: false });
       return;
     }
     
     if (!req.file) {
       res.status(400).json({ success: false, message: 'No file uploaded' });
-      return;
-    }
-  
-    if (!isImageMymeType(req.file.mimetype)) {
-      res.status(400).json({ success: false, message: 'File is not an image' });
       return;
     }
   
