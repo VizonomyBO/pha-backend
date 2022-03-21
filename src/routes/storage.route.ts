@@ -25,52 +25,61 @@ router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
 });
 
-router.post('/', multer.single('file'), async (req: RequestWithFile, res: Response, next: NextFunction) => {
-  if (!req.file) {
-    res.status(400).json({ success: false, message: 'No file uploaded' });
-    return;
-  }
+const upload = multer.single('file');
 
-  if (req.file.size > +process.env.MAX_FILE_SIZE_IN_BYTES) {
-    res.status(400).json({ success: false, message: 'File is too large' });
-    return;
-  }
 
-  if (!isImageMymeType(req.file.mimetype)) {
-    res.status(400).json({ success: false, message: 'File is not an image' });
-    return;
-  }
-
-  const name = generateRandomNameWithExtension(req.file.mimetype.split('/')[1]);
-  const blob = bucket.file(name);
-  
-  const blobStream = blob.createWriteStream({
-    metadata: {
-      contentType: req.file.mimetype
-    },
-    resumable: false,
-    public: true
-  });
-  
-  blobStream.on('error', err => {
-    console.error(err);
-    next(err);
-  });
-
-  blobStream.on('finish', async () => {
-    const publicUrl = getPublicURL(bucket.name, blob.name);
-    try {
-      await blob.makePublic();
-      console.info(`Successfully uploaded to ${publicUrl}`);
-      res.status(200).send({url: publicUrl, success: true});
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({error: error, success: false});
+router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction) => {
+  upload(req, res, async (err: Error) => {
+    if (err instanceof Multer.MulterError) {
+      console.error(err);
+      res.status(400).send({ error: err.message, success: false });
+      return;
+    } else if (err) {
+      console.error(err);
+      res.status(500).send({ error: err, success: false });
+      return;
     }
+    
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+  
+    if (!isImageMymeType(req.file.mimetype)) {
+      res.status(400).json({ success: false, message: 'File is not an image' });
+      return;
+    }
+  
+    const name = generateRandomNameWithExtension(req.file.mimetype.split('/')[1]);
+    const blob = bucket.file(name);
+    
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: req.file.mimetype
+      },
+      resumable: false,
+      public: true
+    });
+    
+    blobStream.on('error', err => {
+      console.error(err);
+      next(err);
+    });
+  
+    blobStream.on('finish', async () => {
+      const publicUrl = getPublicURL(bucket.name, blob.name);
+      try {
+        await blob.makePublic();
+        console.info(`Successfully uploaded to ${publicUrl}`);
+        res.status(200).send({url: publicUrl, success: true});
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({error: error, success: false});
+      }
+    });
+  
+    blobStream.end(req.file.buffer);
   });
-
-  blobStream.end(req.file.buffer);
-
 });
 
 export default router;
