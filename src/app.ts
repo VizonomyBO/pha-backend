@@ -1,5 +1,9 @@
-import { validateEnvFile } from './validator';
+// environment and validation
 import 'dotenv/config';
+import { validateEnvFile } from './validator';
+validateEnvFile();
+
+// All imports
 import * as express from 'express';
 import { Request, Response } from 'express';
 import storageRouter from './routes/storage.route';
