@@ -8,3 +8,7 @@ export const generateRandomName = (): string => {
 export const generateRandomNameWithExtension = (extension: string): string => {
   return `${generateRandomName()}.${extension}`;
 }
+
+export const isImageMymeType = (mimeType: string): boolean => {
+  return mimeType.startsWith('image/');
+}
