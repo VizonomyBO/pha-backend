@@ -4,3 +4,7 @@ export const generateRandomName = (): string => {
     .substring(2, 15);
   return `${randomName}-${Date.now()}`;
 }
+
+export const generateRandomNameWithExtension = (extension: string): string => {
+  return `${generateRandomName()}.${extension}`;
+}

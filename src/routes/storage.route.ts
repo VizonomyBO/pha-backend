@@ -3,7 +3,7 @@ import * as Multer from 'multer';
 import { Storage } from '@google-cloud/storage';
 import { Request, Response, NextFunction } from 'express';
 import { MulterFile } from '../@types';
-import { generateRandomName } from '../utils';
+import { generateRandomNameWithExtension } from '../utils';
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.post('/', multer.single('file'), async (req: Request & { file: MulterFile
   if (!req.file) {
     res.status(400).json({ success: false, message: 'No file uploaded' });
   }
-  const name = `${generateRandomName()}.${req.file.mimetype.split('/')[1]}`;
+  const name = generateRandomNameWithExtension(req.file.mimetype.split('/')[1]);
   const blob = bucket.file(name);
   
   const blobStream = blob.createWriteStream({
