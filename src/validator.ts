@@ -12,8 +12,6 @@ export const validateEnvFile = () => {
     });
   }
   const invalidVariables = Object.keys(REQUIRED_VARIABLES).filter(variable => {
-    console.log(`${variable} = ${process.env[variable]}`);
-    console.log(`${variable} type = ${REQUIRED_VARIABLES[variable].type}`);
     if (REQUIRED_VARIABLES[variable].type === 'number') {
       return isNaN(Number(process.env[variable]));
     }
