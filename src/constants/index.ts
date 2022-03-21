@@ -1,0 +1,3 @@
+export const REQUIRED_VARIABLES = [
+  'GCLOUD_STORAGE_BUCKET'
+];
