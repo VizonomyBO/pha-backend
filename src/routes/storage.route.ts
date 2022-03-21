@@ -1,8 +1,8 @@
 import * as express from 'express';
 import * as Multer from 'multer';
 import { Storage } from '@google-cloud/storage';
-import { Request, Response, NextFunction } from 'express';
-import { MulterFile } from '../@types';
+import { Response, NextFunction } from 'express';
+import { RequestWithFile } from '../@types';
 import { generateRandomNameWithExtension } from '../utils';
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
 });
 
-router.post('/', multer.single('file'), async (req: Request & { file: MulterFile }, res: Response, next: NextFunction) => {
+router.post('/', multer.single('file'), async (req: RequestWithFile, res: Response, next: NextFunction) => {
   if (!req.file) {
     res.status(400).json({ success: false, message: 'No file uploaded' });
   }

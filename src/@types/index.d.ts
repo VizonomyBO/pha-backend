@@ -1,3 +1,4 @@
+import { Request } from 'express';
 export interface MulterFile {
   key: string // Available using `S3`.
   path: string // Available using `DiskStorage`.
@@ -6,3 +7,5 @@ export interface MulterFile {
   size: number,
   buffer: Buffer
 };
+
+export type RequestWithFile = Request & { file: MulterFile };
