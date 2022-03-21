@@ -45,12 +45,16 @@ router.post('/', multer.single('file'), async (req: Request & { file: MulterFile
     next(err);
   });
 
-  blobStream.on('finish', () => {
+  blobStream.on('finish', async () => {
     const publicUrl = getPublicURL(bucket.name, blob.name);
-    blob.makePublic().then(() => {
+    try {
+      await blob.makePublic();
       console.info(`Successfully uploaded to ${publicUrl}`);
       res.status(200).send({url: publicUrl, success: true});
-    });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({error: error, success: false});
+    }
   });
 
   blobStream.end(req.file.buffer);
