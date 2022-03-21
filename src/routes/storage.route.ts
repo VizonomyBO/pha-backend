@@ -14,6 +14,12 @@ const multer = Multer({
   limits: {
     fileSize: +process.env.MAX_FILE_SIZE_IN_BYTES,
   },
+  fileFilter: (_: never, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    if (!isImageMymeType(file.mimetype)) {
+      return cb(new Error('Invalid file type'), false);
+    }
+    cb(null, true);
+  }
 });
 const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
 
@@ -29,13 +35,17 @@ const upload = multer.single('file');
 
 
 router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction) => {
-  upload(req, res, async (err: Error) => {
+  upload(req, res, async (err: string | Multer.MulterError | Error) => {
+    console.log(err, typeof err);
     if (err instanceof Multer.MulterError) {
       console.error(err);
       res.status(400).send({ error: err.message, success: false });
       return;
-    } else if (err) {
+    } else if (err.toString().includes('Invalid file type')) {
       console.error(err);
+      res.status(400).send({ error: 'Invalid file type', success: false });
+      return;
+    } else {
       res.status(500).send({ error: err, success: false });
       return;
     }
