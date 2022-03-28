@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 export interface PhaRetailer {
-  retailer_id?: number,
+  retailer_id?: string,
   latitude: number,
   longitude: number,
   name: string,
@@ -58,7 +58,7 @@ export interface PhaRetailer {
 }
 
 export interface PhaIndividual {
-  retailer_id: number,
+  retailer_id: string,
   availability: string,
   quality: string,
   visibility: string,
