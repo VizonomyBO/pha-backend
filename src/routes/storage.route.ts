@@ -4,6 +4,7 @@ import { Storage } from '@google-cloud/storage';
 import { Response, NextFunction } from 'express';
 import { RequestWithFile } from '../@types';
 import { generateRandomNameWithExtension, isImageMymeType } from '../utils';
+import config from '../config';
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const storage = new Storage();
 const multer = Multer({
   storage: Multer.memoryStorage(),
   limits: {
-    fileSize: +process.env.MAX_FILE_SIZE_IN_BYTES,
+    fileSize: + config.constants.maxFileSize,
   },
   fileFilter: (_: never, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
     if (!isImageMymeType(file.mimetype)) {
@@ -21,7 +22,7 @@ const multer = Multer({
     cb(null, true);
   }
 });
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
+const bucket = storage.bucket(config.gcloud.bucket);
 
 const getPublicURL = (bucketname: string, filename: string): string => {
   return `https://storage.googleapis.com/${bucketname}/${filename}`;
