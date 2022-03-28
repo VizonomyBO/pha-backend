@@ -1,6 +1,8 @@
 import * as express from 'express';
 import axios from 'axios';
 import { PhaRetailer } from '../@types/database';
+import validatePhaRetailer from '../validation/PhaRetailer';
+import config from '../config';
 import { Request, Response } from 'express';
 const router = express.Router();
 
@@ -11,8 +13,8 @@ const getOAuthToken = async (): Promise<string> => {
     const response = await axios.post(
       'https://auth.carto.com/oauth/token',
       {
-        client_id: process.env.CARTO_CLIENT_ID,
-        client_secret: process.env.CARTO_CLIENT_SECRET,
+        client_id: config.carto.clientId,
+        client_secret: config.carto.clientSecret,
         audience: 'carto-cloud-native-api',
         grant_type: 'client_credentials'
       },
@@ -39,6 +41,11 @@ router.post('/pha-retailer', async (req: Request, res: Response) => {
   try {
     const token = await getOAuthToken();
     console.log('my token', token);
+    if(validatePhaRetailer(body)) {
+      console.log('data valida')
+    } else {
+      console.log(validatePhaRetailer.errors);
+    }
     const optionalFields = [
       'sun_open',
       'sun_close',
@@ -62,13 +69,13 @@ router.post('/pha-retailer', async (req: Request, res: Response) => {
       'owner_name',
       'owner_photo'
     ];
-    const fields = optionalFields.reduce((acc, curr) => {
+    const fields = optionalFields.reduce((acc: string[], curr) => {
       if (retailer[curr]) {
         acc.push(curr);
       }
       return acc;
     }, []);
-    const fieldValues = fields.reduce((acc, curr) => {
+    const fieldValues = fields.reduce((acc: string[], curr) => {
       acc.push(retailer[curr]);
       return acc;
     }, []);
