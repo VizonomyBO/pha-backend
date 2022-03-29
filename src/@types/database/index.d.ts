@@ -58,6 +58,7 @@ export interface PhaRetailer {
 }
 
 export interface PhaIndividual {
+  individual_id: string,
   retailer_id: string,
   availability: string,
   quality: string,

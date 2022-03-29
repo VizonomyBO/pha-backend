@@ -70,6 +70,17 @@ const generateValues = (array: PHAGroup, fields: string[]) => {
   }, [])
 }
 
+export const getProfile = async (id: string) => {
+  try {
+    const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${id}'`;
+    const response = await getRequestToCarto(query);
+    return response.rows[0];
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   const optionalFields = [
     'retailer_id',
@@ -91,12 +102,14 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   const query = `
     INSERT INTO ${PHA_INDIVIDUAL}
     (
-      retailer_id
+      individual_id,
+      submission_date,
       ${fields ? ',' : ''}
       ${fields.join(', ')}
     )
     VALUES (
-      GENERATE_UUID()
+      GENERATE_UUID(),
+      '${new Date()}'
       ${fieldValues ? ',' : ''}
       ${fieldValues.map((value: string) => `'${value}'`).join(', ')}
     )

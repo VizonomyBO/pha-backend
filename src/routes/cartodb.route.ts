@@ -1,12 +1,23 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response } from 'express';
-import { insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { getProfile, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
 
 const router = express.Router();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
+});
+
+router.get('/profile/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const response = await getProfile(id);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  }
 });
 
 router.post('/pha-individual', async (req: Request, res: Response) => {
