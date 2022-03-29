@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { QueryParams } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
@@ -121,6 +122,41 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   return response;
 };
 
+export const getRetailer = (queryParams: QueryParams) => {
+  const { page, limit, search, status, dateRange } = queryParams;
+  const offset = (page - 1) * limit;
+  let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
+  const suffix = ` ORDER BY submission_date DESC LIMIT ${queryParams.limit} OFFSET ${offset}`;
+  let hasWhere = false;
+  if (search) {
+    const upperSearch = search.toUpperCase();
+    query += ` WHERE UPPER(name) LIKE '%${upperSearch}%'`;
+    hasWhere = true;
+  }
+  if (status) {
+    if (hasWhere) {
+      query += ` AND submission_status = '${status}'`;
+    } else {
+      query += ` WHERE submission_status = '${status}'`;
+      hasWhere = true;
+    }
+  }
+  // TODO: verify if this work when we have enough data of many dates, maybe we need to change
+  // some things 
+  if (dateRange) {
+    const [startDate, endDate] = dateRange.split('|');
+    if (hasWhere) {
+      query += ` AND submission_date BETWEEN '${startDate}' AND '${endDate}'`;
+    } else {
+      query += ` WHERE submission_date BETWEEN '${startDate}' AND '${endDate}'`;
+      hasWhere = true;
+    }
+  }
+  query += suffix;
+  const response = getRequestToCarto(query);
+  return response;
+}
+
 export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   // TODO: Rolo move this to a middleware
   retailer.submission_date = new Date();
@@ -130,7 +166,7 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
     const fields: string[] = [];
     const fieldValues: string[] = [];
     Object.keys(retailer).forEach((key: string) => {
-      if (key != 'longitude' && key != 'latitude') {
+      if (key !== 'longitude' && key !== 'latitude') {
         fields.push(key);
         fieldValues.push(retailer[key]);
       }

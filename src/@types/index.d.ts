@@ -9,3 +9,11 @@ export interface MulterFile {
 };
 
 export type RequestWithFile = Request & { file: MulterFile };
+
+export interface QueryParams { 
+  page: number,
+  limit: number,
+  search: string,
+  status: string, 
+  dateRange: string
+};

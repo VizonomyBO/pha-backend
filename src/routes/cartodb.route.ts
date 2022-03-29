@@ -1,12 +1,31 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response } from 'express';
-import { getProfile, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { QueryParams } from '../@types';
 
 const router = express.Router();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
+});
+
+router.get('/pha-retailer', async (req: Request, res: Response) => {
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
+  try {
+    const queryParams: QueryParams = {
+      page: +page,
+      limit: +limit,
+      status: status as string,
+      search: search as string,
+      dateRange: dateRange as string
+    };
+    const response = await getRetailer(queryParams);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 router.get('/profile/:id', async (req: Request, res: Response) => {
