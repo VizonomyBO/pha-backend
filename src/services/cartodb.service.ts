@@ -82,7 +82,8 @@ export const getProfile = async (id: string) => {
     throw error;
   }
 }
-
+//TODO: ROLO: Now retailer_id is a required field, so we can use your validation to check if it is empty in the middleware
+// also please adapt to match with your other  insert function (insertIntoPHARetailer)
 export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   const optionalFields = [
     'retailer_id',
@@ -105,7 +106,7 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
     INSERT INTO ${PHA_INDIVIDUAL}
     (
       individual_id,
-      submission_date,
+      submission_date
       ${fields ? ',' : ''}
       ${fields.join(', ')}
     )
@@ -122,35 +123,62 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   return response;
 };
 
+export const getIndividual = async (queryParams: QueryParams) => {
+  try {
+    const { page, limit, search, status, dateRange } = queryParams;
+    const offset = (page - 1) * limit;
+    let query = `SELECT pi.*, pr.name,
+    pr.address_1, pr.city, pr.state,
+    pr.zipcode
+    FROM ${PHA_INDIVIDUAL} pi 
+    JOIN ${PHA_RETAILER_TABLE} pr ON pi.retailer_id = pr.retailer_id`;
+    const where: string[] = [];
+    if (search) {
+      const upperSearch = search.toUpperCase();
+      where.push(`UPPER(pr.name) LIKE '%${upperSearch}%'`);
+    }
+    if (status) {
+      where.push(`pr.submission_status = '${status}'`);
+    }
+    // please check the date
+    if (dateRange) {
+      const [ startDate, endDate ] = dateRange.split('|');
+      where.push(`pr.submission_date BETWEEN '${startDate}' AND '${endDate}'`);
+    }
+    if (where.length) {
+      query += ` WHERE ${where.join(' AND ')}`;
+    }
+    query += ` ORDER BY pi.submission_date DESC LIMIT ${limit} OFFSET ${offset}`;
+    //console.log(query);
+    const response = await getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const getRetailer = (queryParams: QueryParams) => {
   const { page, limit, search, status, dateRange } = queryParams;
   const offset = (page - 1) * limit;
   let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
   const suffix = ` ORDER BY submission_date DESC LIMIT ${queryParams.limit} OFFSET ${offset}`;
-  let hasWhere = false;
+  const where: string[] = [];
   if (search) {
     const upperSearch = search.toUpperCase();
-    query += ` WHERE UPPER(name) LIKE '%${upperSearch}%'`;
-    hasWhere = true;
+    where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
   }
   if (status) {
-    if (hasWhere) {
-      query += ` AND submission_status = '${status}'`;
-    } else {
-      query += ` WHERE submission_status = '${status}'`;
-      hasWhere = true;
-    }
+    where.push(`submission_status = '${status}'`);
   }
   // TODO: verify if this work when we have enough data of many dates, maybe we need to change
   // some things 
   if (dateRange) {
     const [startDate, endDate] = dateRange.split('|');
-    if (hasWhere) {
-      query += ` AND submission_date BETWEEN '${startDate}' AND '${endDate}'`;
-    } else {
-      query += ` WHERE submission_date BETWEEN '${startDate}' AND '${endDate}'`;
-      hasWhere = true;
-    }
+    where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
+  }
+  if (where.length) {
+    query += ` WHERE ${where.join(' AND ')}`;
   }
   query += suffix;
   const response = getRequestToCarto(query);
