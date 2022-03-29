@@ -108,7 +108,7 @@ const schema: JTDSchemaType<PhaRetailer> = {
   },
   optionalProperties: {
     retailer_id: {
-      type: "int32",
+      type: "string",
     },
     sun_open: {
       type: "string",
