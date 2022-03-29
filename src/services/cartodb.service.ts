@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
@@ -122,121 +123,33 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
 
 export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   // TODO: Rolo move this to a middleware
+  retailer.submission_date = new Date();
+  retailer.submission_status = 'Pending';
+  retailer.retailer_id = uuidv4();
   if(validatePhaRetailer(retailer)) {
-    console.log('data valida')
-  } else {
-    console.log(validatePhaRetailer.errors);
-  }
-  // TODO: Rolo try to grab this from your JAV library to avoid redundance 
-  const optionalFields = [
-    'sun_open',
-    'sun_close',
-    'mon_open',
-    'mon_close',
-    'tues_open',
-    'tues_close',
-    'wed_open',
-    'wed_close',
-    'thurs_open',
-    'thurs_close', 
-    'fri_open',
-    'fri_close',
-    'sat_open',
-    'sat_close',
-    'website',
-    'facebook',
-    'instagram',
-    'twitter',
-    'email',
-    'owner_name',
-    'owner_photo'
-  ];
-  const fields = optionalFields.reduce((acc: string[], curr: string) => {
-    if (retailer[curr]) {
-      acc.push(curr);
-    }
-    return acc;
-  }, []);
-  const fieldValues = fields.reduce((acc: string[], curr: string) => {
-    acc.push(retailer[curr]);
-    return acc;
-  }, []);
-  const query = `
+    const fields: string[] = [];
+    const fieldValues: string[] = [];
+    Object.keys(retailer).forEach((key: string) => {
+      if (key != 'longitude' && key != 'latitude') {
+        fields.push(key);
+        fieldValues.push(retailer[key]);
+      }
+    });
+    const query = `
     INSERT INTO ${PHA_RETAILER_TABLE}
       (
-        retailer_id,
         geom,
-        name,
-        address_1,
-        address_2,
-        phone,
-        city,
-        state,
-        zipcode,
-        corner_store,
-        distribution,
-        farmers_market,
-        food_pantry,
-        food_co_op,
-        supermarket,
-        dollar_stores,
-        wic_accepted,
-        snap_accepted,
-        description,
-        availability,
-        quality,
-        visibility,
-        local,
-        produce_avail_store,
-        produce_avail_seasonally,
-        contact_name,
-        contact_email,
-        contact_owner,
-        contact_patron,
-        general_store,
-        grocery_store,
-        submission_date,
-        submission_status
         ${fields.length > 0 ? `, ${fields.join(', ')}` : ''}
       )
       VALUES 
       (
-        GENERATE_UUID(),
-        ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
-        '${retailer.name}',
-        '${retailer.address_1}',
-        '${retailer.address_2}',
-        '${retailer.phone}',
-        '${retailer.city}',
-        '${retailer.state}',
-        '${retailer.zipcode}',
-        '${retailer.corner_store}',
-        '${retailer.distribution}',
-        '${retailer.farmers_market}',
-        '${retailer.food_pantry}',
-        '${retailer.food_co_op}',
-        '${retailer.supermarket}',
-        '${retailer.dollar_stores}',
-        '${retailer.wic_accepted}',
-        '${retailer.snap_accepted}',
-        '${retailer.description}',
-        '${retailer.availability}',
-        '${retailer.quality}',
-        '${retailer.visibility}',
-        '${retailer.local}',
-        '${retailer.produce_avail_store}',
-        '${retailer.produce_avail_seasonally}',
-        '${retailer.contact_name}',
-        '${retailer.contact_email}',
-        '${retailer.contact_owner}',
-        '${retailer.contact_patron}',
-        '${retailer.general_store}',
-        '${retailer.grocery_store}',
-        '${new Date()}',
-        'Pending'
+        ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude})
         ${fieldValues.length > 0 ? `, '${fieldValues.join('\', \'')}'` : ''}
       )`;
-  // const selectAllQuery = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
-  const response = getRequestToCarto(query);
-  return response;
+    const response = getRequestToCarto(query);
+    return response;
+  } else {
+    console.log(validatePhaRetailer.errors);
+    throw new Error(validatePhaRetailer.errors?.toString());
+  }
 }
