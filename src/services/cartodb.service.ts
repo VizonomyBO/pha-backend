@@ -5,15 +5,17 @@ import { PhaIndividual, PhaRetailer } from '../@types/database';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
 import validatePhaIndividual from '../validation/PhaIndividual';
-
-const CONNECTION_NAME = 'carto_dw';
-const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_2';
-const PHA_INDIVIDUAL = 'carto-dw-ac-j9wxt0nz.shared.pha_individual';
+import {  CONNECTION_NAME,
+          PHA_RETAILER_TABLE,
+          PHA_INDIVIDUAL,
+          CARTO_AUTH_URL,
+          CARTO_API,
+          CARTO_API_VERSION } from '@/constants'
 
 export const getOAuthToken = async (): Promise<string> => {
   try {
     const response = await axios.post(
-      'https://auth.carto.com/oauth/token',
+      CARTO_AUTH_URL,
       {
         client_id: config.carto.clientId,
         client_secret: config.carto.clientSecret,
@@ -37,7 +39,7 @@ const getRequestToCarto = async (query: string) => {
   try {
     const token = await getOAuthToken();
     const response = await axios.post(
-      `https://gcp-us-east1.api.carto.com/v3/sql/${CONNECTION_NAME}/query`,
+      `${CARTO_API}/${CARTO_API_VERSION}/sql/${CONNECTION_NAME}/query`,
       {
         q: query,
       },
