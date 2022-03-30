@@ -8,6 +8,8 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import storageRouter from './routes/storage.route';
 import cartoRouter from './routes/cartodb.route';
+import * as swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from './swagger.json';
 
 const app = express();
 app.use(express.json());
@@ -24,3 +26,4 @@ app.listen(port, () => {
 
 app.use('/storage', storageRouter);
 app.use('/cartodb', cartoRouter);
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

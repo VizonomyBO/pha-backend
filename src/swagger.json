@@ -1,0 +1,114 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "PHA",
+    "description": "PHA"
+  },
+  "servers": [
+    {
+      "url": "/api/",
+      "description": "Local dev"
+    }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Prefix the value with \"ApiKey\" to indicate the custom authorization type"
+      }
+    }
+  },
+  "paths": {
+    "/cartodb/pha-individual": {
+      "post": {
+        "tags": ["CartoDB"],
+        "summary": "Create a individual",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-individual"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      },
+      "get": {
+        "tags": ["CartoDB"],
+        "summary": "Get a individual",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "id": {
+      "properties": {
+        "uuid": {
+          "type": "string"
+        }
+      }
+    },
+    "Pha-individual": {
+      "type": "object",
+      "properties": {
+        "individual_id": {
+          "type": "string"
+        },
+        "retailer_id": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string"
+        },
+        "meets_need": {
+          "type": "string"
+        },
+        "produce_avail_store": {
+          "type": "string"
+        },
+        "contact_name": {
+          "type": "string"
+        },
+        "contact_email": {
+          "type": "string"
+        },
+        "contact_phone": {
+          "type": "string"
+        },
+        "contact_zipcode": {
+          "type": "string"
+        },
+        "submission_date": {
+          "type": "string"
+        },
+        "submission_status": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
