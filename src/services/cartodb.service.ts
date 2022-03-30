@@ -4,6 +4,7 @@ import { QueryParams } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
+import validatePhaIndividual from '../validation/PhaIndividual';
 
 const CONNECTION_NAME = 'carto_dw';
 const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_2';
@@ -82,45 +83,34 @@ export const getProfile = async (id: string) => {
     throw error;
   }
 }
-//TODO: ROLO: Now retailer_id is a required field, so we can use your validation to check if it is empty in the middleware
-// also please adapt to match with your other  insert function (insertIntoPHARetailer)
+
 export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
-  const optionalFields = [
-    'retailer_id',
-    'availability',
-    'quality',
-    'visibility',
-    'local',
-    'meets_need',
-    'produce_avail_store',
-    'contact_name',
-    'contact_email',
-    'contact_phone',
-    'contact_zipcode',
-    'submission_date',
-    'submission_status'
-  ];
-  const fields = generateFields(individual, optionalFields);
-  const fieldValues = generateValues(individual, fields);
-  const query = `
+  individual.submission_date = new Date();
+  individual.submission_status = 'Pending';
+  individual.individual_id = uuidv4();
+  if(validatePhaIndividual(individual)) {
+    const fields: string[] = [];
+    const fieldValues: string[] = [];
+    Object.keys(individual).forEach((key: string) => {
+      fields.push(key);
+      fieldValues.push(individual[key]);
+    });
+    const query = `
     INSERT INTO ${PHA_INDIVIDUAL}
-    (
-      individual_id,
-      submission_date
-      ${fields ? ',' : ''}
-      ${fields.join(', ')}
-    )
-    VALUES (
-      GENERATE_UUID(),
-      '${new Date()}'
-      ${fieldValues ? ',' : ''}
-      ${fieldValues.map((value: string) => `'${value}'`).join(', ')}
-    )
-  `;
-  // const getAll = `SELECT * FROM ${PHA_INDIVIDUAL}`;
-  // console.log(query);
-  const response = getRequestToCarto(query);
-  return response;
+      (
+        ${fields ? `${fields.join(', ')}` : ''}
+      )
+      VALUES 
+      (
+        ${fieldValues ? `'${fieldValues.join('\', \'')}'` : ''}
+      )`;
+    console.log(query)
+    const response = getRequestToCarto(query);
+    return response;
+  } else {
+    console.log(validatePhaIndividual.errors);
+    throw new Error(validatePhaRetailer.errors?.toString());
+  }
 };
 
 export const getIndividual = async (queryParams: QueryParams) => {
@@ -203,13 +193,14 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
     INSERT INTO ${PHA_RETAILER_TABLE}
       (
         geom,
-        ${fields.length > 0 ? `, ${fields.join(', ')}` : ''}
+        ${fields ? `${fields.join(', ')}` : ''}
       )
       VALUES 
       (
-        ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude})
-        ${fieldValues.length > 0 ? `, '${fieldValues.join('\', \'')}'` : ''}
+        ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
+        ${fieldValues ? `'${fieldValues.join('\', \'')}'` : ''}
       )`;
+    console.log(query);
     const response = getRequestToCarto(query);
     return response;
   } else {
