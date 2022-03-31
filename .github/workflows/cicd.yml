@@ -15,7 +15,7 @@ env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
   RUN_REGION: us-central1
   SERVICE_NAME: pha-express-app
-  ENV_FILE: ${{ secrets.ENV }}
+  ENV_FILE: ${{ secrets.ENV_FILE }}
 
 jobs:
   build:
