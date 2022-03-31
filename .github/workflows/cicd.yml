@@ -53,11 +53,6 @@ jobs:
         echo $ENV_FILE | base64 --decode > .env
         cat .env
 
-    - name: Archive Production Artifact
-      uses: actions/upload-artifact@main
-      with:
-        name: env
-        path: .env
 
   deploy-gcr:
     name: Deploy to GCR
@@ -73,12 +68,11 @@ jobs:
       with:
         name: dist
         path: dist
-      
-    - name: Download Artifact
-      uses: actions/download-artifact@main
-      with:
-        name: env
-        path: .env
+
+    - name: Create env file
+      run: |
+        echo $ENV_FILE | base64 --decode > .env
+        cat .env
 
     - name: Setup GCloud Auth
       id: auth
@@ -88,11 +82,6 @@ jobs:
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v0.2.1
-
-    - name: Create env file
-      run: |
-        ls -la ./
-        cat .env
 
     # Build and push image to Google Container Registry
     - name: Build & Push
