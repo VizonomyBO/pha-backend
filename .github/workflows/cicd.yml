@@ -77,6 +77,10 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v0.2.1
 
+    - name: Create env file
+      run: |
+        ls -la ./
+
     # Build and push image to Google Container Registry
     - name: Build & Push
       run: |-
