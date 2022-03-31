@@ -1,6 +1,6 @@
 import {  IDENTITY_PLATFORM_API,
           IDENTITY_PLATFORM_VERSION,
-          DOMAIN } from '@/constants';
+          DOMAIN } from '../constants';
 import axios from 'axios';
 import { Credentials } from '../@types/';
 import config from '../config';

@@ -10,7 +10,7 @@ import {  CONNECTION_NAME,
           PHA_INDIVIDUAL,
           CARTO_AUTH_URL,
           CARTO_API,
-          CARTO_API_VERSION } from '@/constants'
+          CARTO_API_VERSION } from '../constants'
 
 export const getOAuthToken = async (): Promise<string> => {
   try {
