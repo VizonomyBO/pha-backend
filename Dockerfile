@@ -1,6 +1,6 @@
 FROM node:16.14.2 as build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 COPY yarn.lock ./
@@ -8,7 +8,7 @@ COPY .env ./
 
 RUN yarn install
 
-COPY . .
+COPY . ./
 
 RUN yarn build:prod
 

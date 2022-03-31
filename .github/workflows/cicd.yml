@@ -36,11 +36,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         
-    - name: Create env file
-      run: |
-        echo $ENV_FILE | base64 --decode > .env
-        cat .env
-
     - name: Install dependencies
       run: yarn install
 
@@ -53,12 +48,25 @@ jobs:
         name: dist
         path: dist
 
+    - name: Create env file
+      run: |
+        echo $ENV_FILE | base64 --decode > .env
+        cat .env
+
+    - name: Archive Production Artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: env
+        path: .env
+
   deploy-gcr:
     name: Deploy to GCR
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     - name: Download Artifact
       uses: actions/download-artifact@main
@@ -66,10 +74,11 @@ jobs:
         name: dist
         path: dist
       
-    - name: Create env file
-      run: |
-        echo $ENV_FILE | base64 --decode > .env
-        cat .env
+    - name: Download Artifact
+      uses: actions/download-artifact@main
+      with:
+        name: env
+        path: .env
 
     - name: Setup GCloud Auth
       id: auth
