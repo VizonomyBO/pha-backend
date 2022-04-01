@@ -9,6 +9,8 @@
     "skipLibCheck": true,
     "lib": ["dom", "es6"],
     "baseUrl": "./src",
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
     "paths": {
       "@/*": [
         "./*"

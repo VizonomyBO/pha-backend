@@ -7,8 +7,14 @@ validateEnvFile();
 import * as express from 'express';
 import { Request, Response } from 'express';
 import storageRouter from './routes/storage.route';
+import cartoRouter from './routes/cartodb.route';
+import authRouter from './routes/auth.route';
+import * as swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from './swagger.json';
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded());
 
 app.get('/', async (req: Request, res: Response) => {
   res.json({ success: true, message: 'Express working' });
@@ -20,3 +26,6 @@ app.listen(port, () => {
 });
 
 app.use('/storage', storageRouter);
+app.use('/cartodb', cartoRouter);
+app.use('/auth', authRouter);
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
