@@ -57,23 +57,30 @@ const getRequestToCarto = async (query: string) => {
   }
 };
 
-type PHAGroup = PhaIndividual | PhaRetailer;
-
-const generateFields = (array: PHAGroup, optionalFields: string[]) => {
-  return optionalFields.reduce((acc: string[], curr: string) => {
-    if (array[curr]) {
-      acc.push(curr);
-    }
-    return acc;
-  }, []);
-}
-
-const generateValues = (array: PHAGroup, fields: string[]) => {
-  return fields.reduce((acc: string[], curr: string) => {
-    acc.push(array[curr]);
-    return acc;
-  }, [])
-}
+export const getBadges = async (id: string) => {
+  const query = `
+    SELECT (fresh / total) AS fresh_percentage,
+          (acceptable / total) AS acceptable_percentage,
+          (visible / total) AS visible_percentage,
+          (local / total) AS local_percentage,
+          (meets_need / total) AS meets_need_percentage
+          FROM (SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+            SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+            SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+            SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+            SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need
+          FROM ${PHA_INDIVIDUAL}
+          WHERE retailer_id = '${id}')`;
+  try {
+    const response = await getRequestToCarto(query);
+    return response.rows[0];
+  } catch(error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 export const getProfile = async (id: string) => {
   try {
