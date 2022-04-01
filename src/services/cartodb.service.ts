@@ -106,7 +106,6 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
       (
         ${`'${fieldValues.join('\', \'')}'`}
       )`;
-    console.log(query)
     const response = getRequestToCarto(query);
     return response;
   } else {
@@ -201,7 +200,6 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
         ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
         ${`'${fieldValues.join('\', \'')}'`}
       )`;
-    console.log(query);
     const response = getRequestToCarto(query);
     return response;
   } else {
