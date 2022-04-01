@@ -100,11 +100,11 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
     const query = `
     INSERT INTO ${PHA_INDIVIDUAL}
       (
-        ${fields ? `${fields.join(', ')}` : ''}
+        ${`${fields.join(', ')}`}
       )
       VALUES 
       (
-        ${fieldValues ? `'${fieldValues.join('\', \'')}'` : ''}
+        ${`'${fieldValues.join('\', \'')}'`}
       )`;
     console.log(query)
     const response = getRequestToCarto(query);
@@ -178,7 +178,6 @@ export const getRetailer = (queryParams: QueryParams) => {
 }
 
 export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
-  // TODO: Rolo move this to a middleware
   retailer.submission_date = new Date();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
@@ -195,12 +194,12 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
     INSERT INTO ${PHA_RETAILER_TABLE}
       (
         geom,
-        ${fields ? `${fields.join(', ')}` : ''}
+        ${`${fields.join(', ')}`}
       )
       VALUES 
       (
         ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
-        ${fieldValues ? `'${fieldValues.join('\', \'')}'` : ''}
+        ${`'${fieldValues.join('\', \'')}'`}
       )`;
     console.log(query);
     const response = getRequestToCarto(query);
