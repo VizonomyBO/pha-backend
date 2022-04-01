@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "tsc -w"
+    "build": "tsc -w",
+    "build:prod": "tsc --project ./"
   },
   "keywords": [
     "backend",
