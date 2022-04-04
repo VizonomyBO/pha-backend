@@ -1,13 +1,23 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response, NextFunction } from 'express';
-import { getIndividual, getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { getBadges, getIndividual, getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
 import { QueryParams } from '../@types';
 
 const router = express.Router();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
+});
+
+router.get('/badges/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const response = await getBadges(id);
+    res.send({ success: true, data: response });
+  } catch(err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 router.get('/pha-individual', async (req: Request, res: Response, next: NextFunction) => {
