@@ -2,6 +2,9 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { QueryParams } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
+import BadRequestError from '../errors/BadRequestError';
+import NotFoudError from '../errors/NotFoundError';
+import AuthenticationError from '../errors/AuthenticationError';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
 import validatePhaIndividual from '../validation/PhaIndividual';
@@ -11,8 +14,10 @@ import {  CONNECTION_NAME,
           CARTO_AUTH_URL,
           CARTO_API,
           CARTO_API_VERSION } from '../constants'
+import logger from '../utils/LoggerUtil';
 
 export const getOAuthToken = async (): Promise<string> => {
+  logger.info("executing function: getOAuthToken");
   try {
     const response = await axios.post(
       CARTO_AUTH_URL,
@@ -30,12 +35,17 @@ export const getOAuthToken = async (): Promise<string> => {
     );
     return response.data.access_token;
   } catch (error) {
-    console.error(error);
-    throw error.response.data;
+    if (error.response.status == 401) {
+      throw new AuthenticationError('Cannot get CARTO credentials.');
+    }
+    throw error.response.data.error;
   }
 };
 
 const getRequestToCarto = async (query: string) => {
+  logger.info("executing function: getRequestToCarto");
+  const params = JSON.stringify(query);
+  logger.debug(`with params: ${params}`);
   try {
     const token = await getOAuthToken();
     const response = await axios.post(
@@ -52,8 +62,10 @@ const getRequestToCarto = async (query: string) => {
     );
     return response.data;
   } catch(error) {
-    console.error(error);
-    throw error.response.data;
+    if (error.response?.status == 404) {
+      throw new NotFoudError('Table not found');
+    }
+    throw error;
   }
 };
 
@@ -76,17 +88,25 @@ const generateValues = (array: PHAGroup, fields: string[]) => {
 }
 
 export const getProfile = async (id: string) => {
+  logger.info("executing function: getProfile");
+  const params = JSON.stringify(id);
+  logger.debug(`with params: ${params}`);
   try {
     const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${id}'`;
     const response = await getRequestToCarto(query);
+    if (response.rows.length == 0) {
+      throw new NotFoudError("Retailer not found");
+    }
     return response.rows[0];
   } catch (error) {
-    console.error(error);
     throw error;
   }
 }
 
 export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
+  logger.info("executing function: insertIntoPHAIndividual");
+  const params = JSON.stringify(individual);
+  logger.debug(`with params: ${params}`);
   individual.submission_date = new Date();
   individual.submission_status = 'Pending';
   individual.individual_id = uuidv4();
@@ -106,15 +126,21 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
       (
         ${`'${fieldValues.join('\', \'')}'`}
       )`;
-    const response = getRequestToCarto(query);
-    return response;
+    try {
+      const response = getRequestToCarto(query);
+      return response;
+    } catch(error) {
+      throw error;
+    }
   } else {
-    console.log(validatePhaIndividual.errors);
-    throw new Error(validatePhaRetailer.errors?.toString());
+    throw new BadRequestError(validatePhaIndividual.errors?.['0'].message?.toString());
   }
 };
 
 export const getIndividual = async (queryParams: QueryParams) => {
+  logger.info("executing function: getIndividual");
+  const params = JSON.stringify(queryParams);
+  logger.debug(`with params: ${params}`);
   try {
     const { page, limit, search, status, dateRange } = queryParams;
     const offset = (page - 1) * limit;
@@ -140,43 +166,51 @@ export const getIndividual = async (queryParams: QueryParams) => {
       query += ` WHERE ${where.join(' AND ')}`;
     }
     query += ` ORDER BY pi.submission_date DESC LIMIT ${limit} OFFSET ${offset}`;
-    //console.log(query);
     const response = await getRequestToCarto(query);
     return response;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };
 
 export const getRetailer = (queryParams: QueryParams) => {
-  const { page, limit, search, status, dateRange } = queryParams;
-  const offset = (page - 1) * limit;
-  let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
-  const suffix = ` ORDER BY submission_date DESC LIMIT ${queryParams.limit} OFFSET ${offset}`;
-  const where: string[] = [];
-  if (search) {
-    const upperSearch = search.toUpperCase();
-    where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
+  logger.info("executing function: getRetailer");
+  const params = JSON.stringify(queryParams);
+  logger.debug(`with params: ${params}`);
+  try {
+    const { page, limit, search, status, dateRange } = queryParams;
+    const offset = (page - 1) * limit;
+    let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
+    const suffix = ` ORDER BY submission_date DESC LIMIT ${queryParams.limit} OFFSET ${offset}`;
+    const where: string[] = [];
+    if (search) {
+      const upperSearch = search.toUpperCase();
+      where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
+    }
+    if (status) {
+      where.push(`submission_status = '${status}'`);
+    }
+    // TODO: verify if this work when we have enough data of many dates, maybe we need to change
+    // some things 
+    if (dateRange) {
+      const [startDate, endDate] = dateRange.split('|');
+      where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
+    }
+    if (where.length) {
+      query += ` WHERE ${where.join(' AND ')}`;
+    }
+    query += suffix;
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
   }
-  if (status) {
-    where.push(`submission_status = '${status}'`);
-  }
-  // TODO: verify if this work when we have enough data of many dates, maybe we need to change
-  // some things 
-  if (dateRange) {
-    const [startDate, endDate] = dateRange.split('|');
-    where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
-  }
-  if (where.length) {
-    query += ` WHERE ${where.join(' AND ')}`;
-  }
-  query += suffix;
-  const response = getRequestToCarto(query);
-  return response;
 }
 
 export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
+  logger.info("executing function: insertIntoPHARetailer");
+  const params = JSON.stringify(retailer);
+  logger.debug(`with params: ${params}`);
   retailer.submission_date = new Date();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
@@ -200,10 +234,13 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
         ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
         ${`'${fieldValues.join('\', \'')}'`}
       )`;
-    const response = getRequestToCarto(query);
-    return response;
+    try{
+      const response = getRequestToCarto(query);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   } else {
-    console.log(validatePhaRetailer.errors);
-    throw new Error(validatePhaRetailer.errors?.toString());
+    throw new BadRequestError(validatePhaRetailer.errors?.['0'].message?.toString());
   }
 }

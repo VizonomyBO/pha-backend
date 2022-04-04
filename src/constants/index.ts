@@ -15,3 +15,7 @@ export const CARTO_API = 'https://gcp-us-east1.api.carto.com';
 export const CARTO_API_VERSION = "v3"
 export const IDENTITY_PLATFORM_API = 'https://identitytoolkit.googleapis.com';
 export const IDENTITY_PLATFORM_VERSION = 'v1';
+export const ERROR_CODE_DEFAULT = 500;
+export const ERROR_CODE_UNAUTHORIZED = 401;
+export const ERROR_CODE_BAD_REQUEST = 400;
+export const ERROR_CODE_NOT_FOUND = 404;
