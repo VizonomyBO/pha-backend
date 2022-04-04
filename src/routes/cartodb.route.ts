@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response } from 'express';
-import { getBadges, getIndividual, getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { getBadges, getIndividual, getOAuthToken, getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
 import { QueryParams } from '../@types';
 
 const router = express.Router();
@@ -15,6 +15,15 @@ router.get('/badges/:id', async (req: Request, res: Response) => {
   try {
     const response = await getBadges(id);
     res.send({ success: true, data: response });
+  } catch(err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.get('/token', async (_: unknown, res: Response) => {
+  try {
+    const response = await getOAuthToken();
+    res.send({ success: true, data: {token: response } });
   } catch(err) {
     res.status(500).json({ success: false, message: err.message });
   }
