@@ -56,6 +56,143 @@
       "get": {
         "tags": ["CartoDB"],
         "summary": "Get a individual",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "description": "Page of individuals. Default 1",
+            "schema": {
+              "$ref": "#/definitions/page"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "Size of page of posts. Default 10",
+            "schema": {
+              "$ref": "#/definitions/size"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "description": "Search filter",
+            "schema": {
+              "$ref": "#/definitions/search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateRange",
+            "required": false,
+            "description": "Date range for get data",
+            "schema": {
+              "$ref": "#/definitions/status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cartodb/pha-retailer": {
+      "post": {
+        "tags": ["CartoDB"],
+        "summary": "Create a retailer",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-retailer"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      },
+      "get": {
+        "tags": ["CartoDB"],
+        "summary": "Get retailers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "description": "Page of individuals. Default 1",
+            "schema": {
+              "$ref": "#/definitions/page"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "Size of page of posts. Default 10",
+            "schema": {
+              "$ref": "#/definitions/size"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "description": "Search filter",
+            "schema": {
+              "$ref": "#/definitions/size"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateRange",
+            "required": false,
+            "description": "Date range for get data",
+            "schema": {
+              "$ref": "#/definitions/size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cartodb//profile/:id": {
+      "get": {
+        "tags": ["CartoDB"],
+        "summary": "Get profile of a retailer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of retailer to get profile.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -87,12 +224,65 @@
           }
         }
       }
+    },
+    "/storage": {
+      "post": {
+        "tags": ["Storage"],
+        "summary": "Save a file",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/definitions/File"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
     }
   },
   "definitions": {
     "id": {
       "properties": {
         "uuid": {
+          "type": "string"
+        }
+      }
+    },
+    "page": {
+      "properties": {
+        "meeting": {
+          "type": "number"
+        }
+      }
+    },
+    "size": {
+      "properties": {
+        "meeting": {
+          "type": "number"
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "meeting": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "properties": {
+        "meeting": {
           "type": "string"
         }
       }
@@ -133,6 +323,182 @@
         "submission_status": {
           "type": "string"
         }
+      }
+    },
+    "Pha-retailer": {
+      "type": "object",
+      "properties": {
+        "retailer_id": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "address_1": {
+          "type": "string"
+        },
+        "address_2": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zipcode": {
+          "type": "string"
+        },
+        "sun_open": {
+          "type": "string"
+        },
+        "sun_close": {
+          "type": "string"
+        },
+        "mon_open": {
+          "type": "string"
+        },
+        "mon_close": {
+          "type": "string"
+        },
+        "tues_open": {
+          "type": "string"
+        },
+        "tues_close": {
+          "type": "string"
+        },
+        "wed_open": {
+          "type": "string"
+        },
+        "wed_close": {
+          "type": "string"
+        },
+        "trus_open": {
+          "type": "string"
+        },
+        "trus_close": {
+          "type": "string"
+        },
+        "fri_open": {
+          "type": "string"
+        },
+        "fri_close": {
+          "type": "string"
+        },
+        "sat_open": {
+          "type": "string"
+        },
+        "sat_close": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "facebook": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "corner_store": {
+          "type": "string"
+        },
+        "distribution": {
+          "type": "string"
+        },
+        "farmers_market": {
+          "type": "string"
+        },
+        "food_pantry": {
+          "type": "string"
+        },
+        "food_co_op": {
+          "type": "string"
+        },
+        "supermarket": {
+          "type": "string"
+        },
+        "dollar_stores": {
+          "type": "string"
+        },
+        "wic_accepted": {
+          "type": "string"
+        },
+        "snap_accepted": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "availability": {
+          "type": "string"
+        },
+        "quality": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string"
+        },
+        "local": {
+          "type": "string"
+        },
+        "produce_avail_store": {
+          "type": "string"
+        },
+        "produce_avail_seasonally": {
+          "type": "string"
+        },
+        "owner_photo": {
+          "type": "string"
+        },
+        "owner_name": {
+          "type": "string"
+        },
+        "contact_name": {
+          "type": "string"
+        },
+        "contact_email": {
+          "type": "string"
+        },
+        "contact_owner": {
+          "type": "string"
+        },
+        "contact_patron": {
+          "type": "string"
+        },
+        "general_store": {
+          "type": "string"
+        },
+        "grocery_store": {
+          "type": "string"
+        },
+        "submission_date": {
+          "type": "string"
+        },
+        "submission_status": {
+          "type": "string"
+        }
+      }
+    },
+    "File": {
+      "file": {
+        "type": "string",
+        "format": "binary"
       }
     },
     "Credentials": {
