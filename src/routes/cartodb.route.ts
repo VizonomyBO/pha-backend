@@ -33,7 +33,7 @@ router.get('/pha-individual', async (req: Request, res: Response, next: NextFunc
     const response = await getIndividual(queryParams);
     res.send({ success: true, data: response });
   } catch (error) {
-    next(error)
+    next(error);
   }
 });
 

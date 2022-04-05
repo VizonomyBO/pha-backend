@@ -36,7 +36,8 @@ app.use(
     response
       .status(errorCode)
       .json({
-        errorMessage,
+        success: false,
+        error: errorMessage,
       })
       .send();
     next();
