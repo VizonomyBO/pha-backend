@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { QueryParams } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import BadRequestError from '../errors/BadRequestError';
-import NotFoudError from '../errors/NotFoundError';
+import NotFoundError from '../errors/NotFoundError';
 import AuthenticationError from '../errors/AuthenticationError';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
@@ -63,7 +63,7 @@ const getRequestToCarto = async (query: string) => {
     return response.data;
   } catch(error) {
     if (error.response?.status == 404) {
-      throw new NotFoudError('Table not found');
+      throw new NotFoundError('Table not found');
     }
     throw error;
   }
@@ -102,7 +102,7 @@ export const getProfile = async (id: string) => {
     const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${id}'`;
     const response = await getRequestToCarto(query);
     if (response.rows.length == 0) {
-      throw new NotFoudError("Retailer not found");
+      throw new NotFoundError("Retailer not found");
     }
     return response.rows[0];
   } catch (error) {

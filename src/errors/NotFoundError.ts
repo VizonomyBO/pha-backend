@@ -1,6 +1,6 @@
 import { ERROR_CODE_NOT_FOUND } from '../constants';
 
-export default class NotFoudError extends Error {
+export default class NotFoundError extends Error {
   code: number;
 
   constructor(message = 'Not found.') {
