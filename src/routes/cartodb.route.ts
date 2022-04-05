@@ -1,7 +1,15 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response } from 'express';
-import { getBadges, getIndividual, getOAuthToken, getProfile, getRetailer, insertIntoPHAIndividual, insertIntoPHARetailer } from '../services/cartodb.service';
+import { 
+  getBadges,
+  getIndividual,
+  getOAuthToken,
+  getProfile,
+  getRetailer,
+  insertIntoPHAIndividual,
+  insertIntoPHARetailer 
+} from '../services/cartodb.service';
 import { QueryParams } from '../@types';
 
 const router = express.Router();
