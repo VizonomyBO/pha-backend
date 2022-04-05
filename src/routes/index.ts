@@ -4,6 +4,7 @@ import logger from '../utils/LoggerUtil';
 import storageRouter from '../routes/storage.route';
 import cartoRouter from '../routes/cartodb.route';
 import authRouter from '../routes/auth.route';
+import * as packageJson from '../../package.json';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.use((request: Request, response: Response, next: NextFunction) => {
 router.get('/', (request: Request, response: Response) => {
   const info = {
     name: 'API',
-    version: '1.0.0'
+    version: packageJson.version
   };
   return response.json(info);
 });
