@@ -6,10 +6,9 @@ COPY package*.json ./
 COPY yarn.lock ./
 COPY .env ./
 
-RUN yarn install
-
 COPY . ./
 
+RUN yarn install
 RUN yarn build:prod
 
 ENV PORT 9000
@@ -17,4 +16,4 @@ ENV PORT 9000
 EXPOSE 9000
 
 # ---
-CMD ["node", "dist/app.js"]
+CMD ["node", "dist/src/app.js"]

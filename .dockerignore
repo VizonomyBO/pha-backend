@@ -1,3 +1,4 @@
 .dockerignore
 Dockerfile
 .gcloudignore
+node_modules
