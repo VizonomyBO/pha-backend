@@ -21,3 +21,10 @@ export interface Credentials {
   username: string;
   password: string;
 };
+
+export default interface ResponseError extends Error {
+  status?: number;
+  code?: number;
+  stack?: any;
+}
+

@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { 
   getBadges,
   getIndividual,
@@ -37,7 +37,7 @@ router.get('/token', async (_: unknown, res: Response) => {
   }
 });
 
-router.get('/pha-individual', async (req: Request, res: Response) => {
+router.get('/pha-individual', async (req: Request, res: Response, next: NextFunction) => {
   const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
   try {
     const queryParams: QueryParams = {
@@ -50,12 +50,11 @@ router.get('/pha-individual', async (req: Request, res: Response) => {
     const response = await getIndividual(queryParams);
     res.send({ success: true, data: response });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-router.get('/pha-retailer', async (req: Request, res: Response) => {
+router.get('/pha-retailer', async (req: Request, res: Response, next: NextFunction) => {
   const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
   try {
     const queryParams: QueryParams = {
@@ -68,43 +67,39 @@ router.get('/pha-retailer', async (req: Request, res: Response) => {
     const response = await getRetailer(queryParams);
     res.send({ data: response, success: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-router.get('/profile/:id', async (req: Request, res: Response) => {
+router.get('/profile/:id', async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.id;
   try {
     const response = await getProfile(id);
     res.send({ data: response, success: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.post('/pha-individual', async (req: Request, res: Response) => {
+router.post('/pha-individual', async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   try {
     const data = await insertIntoPHAIndividual(individual);
     res.send({ data: data, sucess: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: error, success: false });
+    next(error);
   }
 });
 
-router.post('/pha-retailer', async (req: Request, res: Response) => {
+router.post('/pha-retailer', async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const retailer = body as PhaRetailer;
   try {
     const data = await insertIntoPHARetailer(retailer);
     res.send({ data: data, sucess: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: error, success: false });
+    next(error);
   }
 });
 
