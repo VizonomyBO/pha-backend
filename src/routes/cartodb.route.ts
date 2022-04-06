@@ -3,6 +3,7 @@ import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response, NextFunction } from 'express';
 import { 
   getBadges,
+  getFilteredLayers,
   getIndividual,
   getOAuthToken,
   getProfile,
@@ -10,12 +11,24 @@ import {
   insertIntoPHAIndividual,
   insertIntoPHARetailer 
 } from '../services/cartodb.service';
-import { QueryParams } from '../@types';
+import { FiltersInterface, QueryParams } from '../@types';
+import { filtersMiddleware } from '../middlewares/filtersMiddleware';
 
 const router = express.Router();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
+});
+
+router.post('/layers', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const filter = body as FiltersInterface;
+  try {
+    const response = await getFilteredLayers(filter);
+    res.send({ success: true, data: response });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/badges/:id', async (req: Request, res: Response) => {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { QueryParams } from '../@types';
+import { FiltersInterface, QueryParams } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import BadRequestError from '../errors/BadRequestError';
 import NotFoundError from '../errors/NotFoundError';
@@ -39,6 +39,92 @@ export const getOAuthToken = async (): Promise<string> => {
       throw new AuthenticationError('Cannot get CARTO credentials.');
     }
     throw error.response.data.error;
+  }
+};
+
+const DATA_SOURCES = {
+  'retailers_pha': PHA_RETAILER_TABLE,
+  'retailers_osm': PHA_RETAILER_TABLE,
+  'retailers_usda': PHA_RETAILER_TABLE
+};
+
+const buildQueries = (filters: FiltersInterface) => {
+  const queries = {};
+  filters.dataSources.forEach(dataSource => {
+    const where: string[][] = [];
+    if (filters.categories) {
+      const row: string[] = [];
+      filters.categories.forEach(category => {
+        row.push(`${category} = 'Yes'`);
+      });
+      if (row.length) {
+        where.push(row);
+      }
+    }
+    if (filters.accesibility) {
+      const row: string[] = [];
+      filters.accesibility.forEach(accessibility => {
+        row.push(`${accessibility} = 'Yes'`);
+      });
+      if (row.length) {
+        where.push(row);
+      }
+    }
+    let suffix = '';
+    if (filters.badges) {
+      // TODO: logic for badges (next pr) pray for Lua
+    }
+    if (where.length) {
+      console.log(where);
+      const rows = where.map(row => `(${row.join(' OR ')})`);
+      suffix = `WHERE ${rows.join(' AND ')}`;
+    }
+    queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
+  });
+  return queries;
+};
+
+const getRequestToTokenCarto = async (queries: string[]) => {
+  logger.info("executing function: getRequestToTokenCarto");
+  const params = JSON.stringify(queries);
+  logger.debug(`with params: ${params}`);
+  try {
+    const token = await getOAuthToken();
+    const response = await axios.post(
+      `${CARTO_API}/${CARTO_API_VERSION}/tokens?access_token=${token}`,
+      {
+        grants: queries.map(query => ({
+          connection_name: CONNECTION_NAME,
+          source: query
+        })),
+        referers: [],
+        allowed_apis: ['sql', 'maps', 'imports']
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch(error) {
+    throw error;
+  }
+}
+
+export const getFilteredLayers = async (filters: FiltersInterface) => {
+  logger.info("executing function: getFilteredLayers");
+  const queries = buildQueries(filters);
+  try {
+    const requestToTokenCarto = await getRequestToTokenCarto(Object.values(queries));
+    const answer = {
+      queries: queries,
+      token: requestToTokenCarto.token,
+      connection_name: CONNECTION_NAME
+    };
+    return answer;
+  } catch (error) {
+    throw error;
   }
 };
 

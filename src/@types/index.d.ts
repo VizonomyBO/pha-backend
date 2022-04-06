@@ -26,5 +26,12 @@ export default interface ResponseError extends Error {
   status?: number;
   code?: number;
   stack?: any;
-}
+};
 
+type DataSources = 'retailers_pha' | 'retailers_osm' | 'retailers_usda';
+interface FiltersInterface {
+  categories: string[],
+  accesibility: string[],
+  dataSources: string[],
+  badges: string[]
+};
