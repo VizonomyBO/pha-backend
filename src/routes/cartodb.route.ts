@@ -13,6 +13,8 @@ import {
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
+import { phaIndividualMiddleware } from '../middlewares/phaIndividualMiddleware';
+import { phaRetailerMiddleware } from '../middlewares/phaRetailerMiddleware';
 
 const router = express.Router();
 
@@ -94,7 +96,7 @@ router.get('/profile/:id', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-router.post('/pha-individual', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   try {
@@ -105,7 +107,7 @@ router.post('/pha-individual', async (req: Request, res: Response, next: NextFun
   }
 });
 
-router.post('/pha-retailer', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/pha-retailer', [phaRetailerMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const retailer = body as PhaRetailer;
   try {
