@@ -3,6 +3,8 @@ import { PhaIndividual, PhaRetailer } from '../@types/database';
 import { Request, Response, NextFunction } from 'express';
 import { 
   getBadges,
+  getDashboard,
+  getDashboardCount,
   getFilteredLayers,
   getIndividual,
   getOAuthToken,
@@ -78,6 +80,40 @@ router.get('/pha-retailer', async (req: Request, res: Response, next: NextFuncti
       dateRange: dateRange as string
     };
     const response = await getRetailer(queryParams);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/dashboard', async (req: Request, res: Response, next: NextFunction) => {
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
+  try {
+    const queryParams: QueryParams = {
+      page: +page,
+      limit: +limit,
+      status: status as string,
+      search: search as string,
+      dateRange: dateRange as string
+    };
+    const response = await getDashboard(queryParams);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/dashboard-count', async (req: Request, res: Response, next: NextFunction) => {
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
+  try {
+    const queryParams: QueryParams = {
+      page: +page,
+      limit: +limit,
+      status: status as string,
+      search: search as string,
+      dateRange: dateRange as string
+    };
+    const response = await getDashboardCount(queryParams);
     res.send({ data: response, success: true });
   } catch (error) {
     next(error);

@@ -8,13 +8,23 @@ import AuthenticationError from '../errors/AuthenticationError';
 import config from '../config';
 import validatePhaRetailer from '../validation/PhaRetailer';
 import validatePhaIndividual from '../validation/PhaIndividual';
-import {  CONNECTION_NAME,
-          PHA_RETAILER_TABLE,
-          PHA_INDIVIDUAL,
-          CARTO_AUTH_URL,
-          CARTO_API,
-          CARTO_API_VERSION } from '../constants'
+import {  
+  CONNECTION_NAME,
+  PHA_RETAILER_TABLE,
+  PHA_INDIVIDUAL,
+  CARTO_AUTH_URL,
+  CARTO_API,
+  CARTO_API_VERSION
+} from '../constants'
 import logger from '../utils/LoggerUtil';
+import { 
+  buildFilterQueries,
+  getBadgeQuery,
+  getIndividualQuery,
+  getRetailerQuery,
+  getRowsOnUnion,
+  getUnionQuery
+} from '../utils/queryGenerator';
 
 export const getOAuthToken = async (): Promise<string> => {
   logger.info("executing function: getOAuthToken");
@@ -40,48 +50,6 @@ export const getOAuthToken = async (): Promise<string> => {
     }
     throw error.response.data.error;
   }
-};
-
-const DATA_SOURCES = {
-  'retailers_pha': PHA_RETAILER_TABLE,
-  'retailers_osm': PHA_RETAILER_TABLE,
-  'retailers_usda': PHA_RETAILER_TABLE
-};
-
-const buildQueries = (filters: FiltersInterface) => {
-  const queries = {};
-  filters.dataSources.forEach(dataSource => {
-    const where: string[][] = [];
-    if (filters.categories) {
-      const row: string[] = [];
-      filters.categories.forEach(category => {
-        row.push(`${category} = 'Yes'`);
-      });
-      if (row.length) {
-        where.push(row);
-      }
-    }
-    if (filters.accesibility) {
-      const row: string[] = [];
-      filters.accesibility.forEach(accessibility => {
-        row.push(`${accessibility} = 'Yes'`);
-      });
-      if (row.length) {
-        where.push(row);
-      }
-    }
-    let suffix = '';
-    if (filters.badges) {
-      // TODO: logic for badges (next pr) pray for Lua
-    }
-    if (where.length) {
-      console.log(where);
-      const rows = where.map(row => `(${row.join(' OR ')})`);
-      suffix = `WHERE ${rows.join(' AND ')}`;
-    }
-    queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
-  });
-  return queries;
 };
 
 const getRequestToTokenCarto = async (queries: string[]) => {
@@ -114,7 +82,7 @@ const getRequestToTokenCarto = async (queries: string[]) => {
 
 export const getFilteredLayers = async (filters: FiltersInterface) => {
   logger.info("executing function: getFilteredLayers");
-  const queries = buildQueries(filters);
+  const queries = buildFilterQueries(filters);
   try {
     const requestToTokenCarto = await getRequestToTokenCarto(Object.values(queries));
     const answer = {
@@ -156,21 +124,7 @@ const getRequestToCarto = async (query: string) => {
 };
 
 export const getBadges = async (id: string) => {
-  const query = `
-    SELECT (fresh / total) AS fresh_percentage,
-          (acceptable / total) AS acceptable_percentage,
-          (visible / total) AS visible_percentage,
-          (local / total) AS local_percentage,
-          (meets_need / total) AS meets_need_percentage
-          FROM (SELECT
-            COUNT(*) AS total,
-            SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
-            SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
-            SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
-            SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
-            SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need
-          FROM ${PHA_INDIVIDUAL}
-          WHERE retailer_id = '${id}')`;
+  const query = getBadgeQuery(id);
   try {
     const response = await getRequestToCarto(query);
     return response.rows[0];
@@ -235,30 +189,7 @@ export const getIndividual = async (queryParams: QueryParams) => {
   const params = JSON.stringify(queryParams);
   logger.debug(`with params: ${params}`);
   try {
-    const { page, limit, search, status, dateRange } = queryParams;
-    const offset = (page - 1) * limit;
-    let query = `SELECT pi.*, pr.name,
-    pr.address_1, pr.city, pr.state,
-    pr.zipcode
-    FROM ${PHA_INDIVIDUAL} pi 
-    JOIN ${PHA_RETAILER_TABLE} pr ON pi.retailer_id = pr.retailer_id`;
-    const where: string[] = [];
-    if (search) {
-      const upperSearch = search.toUpperCase();
-      where.push(`UPPER(pr.name) LIKE '%${upperSearch}%'`);
-    }
-    if (status) {
-      where.push(`pr.submission_status = '${status}'`);
-    }
-    // please check the date
-    if (dateRange) {
-      const [ startDate, endDate ] = dateRange.split('|');
-      where.push(`pr.submission_date BETWEEN '${startDate}' AND '${endDate}'`);
-    }
-    if (where.length) {
-      query += ` WHERE ${where.join(' AND ')}`;
-    }
-    query += ` ORDER BY pi.submission_date DESC LIMIT ${limit} OFFSET ${offset}`;
+    const query = getIndividualQuery(queryParams);
     const response = await getRequestToCarto(query);
     return response;
   } catch (error) {
@@ -266,39 +197,46 @@ export const getIndividual = async (queryParams: QueryParams) => {
   }
 };
 
-export const getRetailer = (queryParams: QueryParams) => {
+export const getRetailer = async (queryParams: QueryParams) => {
   logger.info("executing function: getRetailer");
   const params = JSON.stringify(queryParams);
   logger.debug(`with params: ${params}`);
   try {
-    const { page, limit, search, status, dateRange } = queryParams;
-    const offset = (page - 1) * limit;
-    let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
-    const suffix = ` ORDER BY submission_date DESC LIMIT ${queryParams.limit} OFFSET ${offset}`;
-    const where: string[] = [];
-    if (search) {
-      const upperSearch = search.toUpperCase();
-      where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
-    }
-    if (status) {
-      where.push(`submission_status = '${status}'`);
-    }
-    // TODO: verify if this work when we have enough data of many dates, maybe we need to change
-    // some things 
-    if (dateRange) {
-      const [startDate, endDate] = dateRange.split('|');
-      where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
-    }
-    if (where.length) {
-      query += ` WHERE ${where.join(' AND ')}`;
-    }
-    query += suffix;
-    const response = getRequestToCarto(query);
+    const query = getRetailerQuery(queryParams);
+    const response = await getRequestToCarto(query);
     return response;
   } catch (error) {
     throw error;
   }
-}
+};
+
+export const getDashboard = async (queryParams: QueryParams) => {
+  logger.info("executing function: getDashboard");
+  const params = JSON.stringify(queryParams);
+  logger.debug(`with params: ${params}`);
+  try {
+    const unionQuery = getUnionQuery(queryParams);
+    logger.debug(`with query: ${unionQuery}`);
+    const response = await getRequestToCarto(unionQuery);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getDashboardCount = async (queryParams: QueryParams) => {
+  logger.info("executing function: getDashboardCount");
+  const params = JSON.stringify(queryParams);
+  logger.debug(`with params: ${params}`);
+  try {
+    const countQuery = getRowsOnUnion(queryParams);
+    logger.debug(`with query: ${countQuery}`);
+    const response = await getRequestToCarto(countQuery);
+    return { count: response.rows[0].count };
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   logger.info("executing function: insertIntoPHARetailer");
