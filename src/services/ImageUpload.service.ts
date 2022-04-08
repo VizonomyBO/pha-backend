@@ -1,8 +1,11 @@
 import { Bucket, Storage } from '@google-cloud/storage';
+import * as fs from 'fs';
 import * as path from 'path';
 import config from '../config';
 import * as Multer from 'multer';
 import { isImageMymeType } from '../utils';
+import * as configCloud from '../config/service.account.json';
+
 
 class ImageUploadService {
 
@@ -11,8 +14,12 @@ class ImageUploadService {
   multer;
 
   constructor() {
+    const filePath = path.join(__dirname, '../config/service.account.json');
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(configCloud));
+    }
     this.storage = new Storage({
-      keyFilename: path.join(__dirname, '../config/service.account.json'),
+      keyFilename: filePath,
       projectId: 'pha-vizonomy'
     });
     this.bucket = this.storage.bucket(config.gcloud.bucket);
