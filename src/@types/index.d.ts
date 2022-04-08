@@ -9,6 +9,7 @@ export interface MulterFile {
 };
 
 export type RequestWithFile = Request & { file: MulterFile };
+export type RequestWithFiles = Request & { files: MulterFile[] };
 
 export interface QueryParams { 
   page: number,

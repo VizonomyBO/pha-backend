@@ -1,54 +1,33 @@
 import * as express from 'express';
 import * as Multer from 'multer';
-import { Storage } from '@google-cloud/storage';
 import { Response, NextFunction } from 'express';
 import { RequestWithFile } from '../@types';
-import { generateRandomNameWithExtension, isImageMymeType } from '../utils';
-import config from '../config';
+import { generateRandomNameWithExtension } from '../utils';
+import ImageUploadService from '../services/ImageUpload.service';
 
 const router = express.Router();
-
-const storage = new Storage();
-
-const multer = Multer({
-  storage: Multer.memoryStorage(),
-  limits: {
-    fileSize: + config.constants.maxFileSize,
-  },
-  fileFilter: (_: never, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
-    if (!isImageMymeType(file.mimetype)) {
-      return cb(new Error('Invalid file type'), false);
-    }
-    cb(null, true);
-  }
-});
-const bucket = storage.bucket(config.gcloud.bucket);
-
-const getPublicURL = (bucketname: string, filename: string): string => {
-  return `https://storage.googleapis.com/${bucketname}/${filename}`;
-}
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
 });
 
-const upload = multer.single('file');
-
+const upload = ImageUploadService.getUploadSingle();
 
 router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction) => {
   upload(req, res, async (err: string | Multer.MulterError | Error) => {
-    console.log(err, typeof err);
-    if (err instanceof Multer.MulterError) {
-      console.error(err);
-      res.status(400).send({ error: err.message, success: false });
-      return;
-    } else if (err.toString().includes('Invalid file type')) {
-      console.error(err);
-      res.status(400).send({ error: 'Invalid file type', success: false });
-      return;
-    } else if (err) {
-      res.status(500).send({ error: err, success: false });
-      return;
+    if (err) {
+      if (err instanceof Multer.MulterError) {
+        console.error(err);
+        res.status(400).send({ error: err.message, success: false });
+        return;
+      } else if (err.toString().includes('Invalid file type')) {
+        console.error(err);
+        res.status(400).send({ error: 'Invalid file type', success: false });
+        return;
+      } else if (err) {
+        res.status(500).send({ error: err, success: false });
+        return;
+      }
     }
     
     if (!req.file) {
@@ -57,8 +36,8 @@ router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction)
     }
   
     const name = generateRandomNameWithExtension(req.file.mimetype.split('/')[1]);
-    const blob = bucket.file(name);
-    
+    const blob = ImageUploadService.getBucket().file(name);
+
     const blobStream = blob.createWriteStream({
       metadata: {
         contentType: req.file.mimetype
@@ -73,7 +52,7 @@ router.post('/', async (req: RequestWithFile, res: Response, next: NextFunction)
     });
   
     blobStream.on('finish', async () => {
-      const publicUrl = getPublicURL(bucket.name, blob.name);
+      const publicUrl = ImageUploadService.getPublicURL(blob.name);
       try {
         await blob.makePublic();
         console.info(`Successfully uploaded to ${publicUrl}`);

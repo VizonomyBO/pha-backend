@@ -105,6 +105,9 @@ const schema: JTDSchemaType<PhaRetailer> = {
     submission_status: {
       type: "string"
     },
+    imagelinks: {
+      type: "string"
+    },
   },
   optionalProperties: {
     retailer_id: {

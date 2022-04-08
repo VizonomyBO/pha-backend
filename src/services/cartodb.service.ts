@@ -272,6 +272,9 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
       throw error;
     }
   } else {
-    throw new BadRequestError(validatePhaRetailer.errors?.['0'].message?.toString());
+    const errorString = validatePhaRetailer.errors?.map((error) => {
+      return `${error.instancePath} ${error.message}`;
+    }).join('\n');
+    throw new BadRequestError(errorString);
   }
 }
