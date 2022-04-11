@@ -84,10 +84,10 @@ export const getFilteredLayers = async (filters: FiltersInterface) => {
   logger.info("executing function: getFilteredLayers");
   const queries = buildFilterQueries(filters);
   try {
-    const requestToTokenCarto = await getRequestToTokenCarto(Object.values(queries));
+    const token = await getOAuthToken();
     const answer = {
       queries: queries,
-      token: requestToTokenCarto.token,
+      token: token,
       connection_name: CONNECTION_NAME
     };
     return answer;
