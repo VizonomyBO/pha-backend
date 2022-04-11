@@ -118,7 +118,7 @@ export const generateWhereArray = (queryParams: QueryParams) => {
     where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
   }
   if (status) {
-    where.push(`submission_status = '${status}'`);
+    where.push(`submission_status IN (${status.split(',')})`);
   }
   // TODO: verify if this work when we have enough data of many dates, maybe we need to change
   // some things 
