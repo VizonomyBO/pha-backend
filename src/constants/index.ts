@@ -9,6 +9,8 @@ export const REQUIRED_VARIABLES = {
 export const DOMAIN = '@localhost.com'
 export const CONNECTION_NAME = 'carto_dw';
 export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_2';
+export const RETAILERS_OSM = 'carto-dw-ac-j9wxt0nz.shared.Dataset_OSM';
+export const RETAILERS_USDA = 'carto-dw-ac-j9wxt0nz.shared.Dataset_USDA';
 export const PHA_INDIVIDUAL = 'carto-dw-ac-j9wxt0nz.shared.pha_individual';
 export const CARTO_AUTH_URL = 'https://auth.carto.com/oauth/token';
 export const CARTO_API = 'https://gcp-us-east1.api.carto.com';
@@ -22,6 +24,6 @@ export const ERROR_CODE_NOT_FOUND = 404;
 
 export const DATA_SOURCES = {
   'retailers_pha': PHA_RETAILER_TABLE,
-  'retailers_osm': PHA_RETAILER_TABLE,
-  'retailers_usda': PHA_RETAILER_TABLE
+  'retailers_osm': RETAILERS_OSM,
+  'retailers_usda': RETAILERS_USDA
 };
