@@ -55,6 +55,7 @@ export interface PhaRetailer {
   grocery_store: string,
   submission_date: Date,
   submission_status: string,
+  imagelinks: string,
 }
 
 export interface PhaIndividual {
