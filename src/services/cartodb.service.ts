@@ -157,30 +157,26 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   individual.submission_date = new Date();
   individual.submission_status = 'Pending';
   individual.individual_id = uuidv4();
-  if(validatePhaIndividual(individual)) {
-    const fields: string[] = [];
-    const fieldValues: string[] = [];
-    Object.keys(individual).forEach((key: string) => {
-      fields.push(key);
-      fieldValues.push(individual[key]);
-    });
-    const query = `
-    INSERT INTO ${PHA_INDIVIDUAL}
-      (
-        ${`${fields.join(', ')}`}
-      )
-      VALUES 
-      (
-        ${`'${fieldValues.join('\', \'')}'`}
-      )`;
-    try {
-      const response = getRequestToCarto(query);
-      return response;
-    } catch(error) {
-      throw error;
-    }
-  } else {
-    throw new BadRequestError(validatePhaIndividual.errors?.['0'].message?.toString());
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    fields.push(key);
+    fieldValues.push(individual[key]);
+  });
+  const query = `
+  INSERT INTO ${PHA_INDIVIDUAL}
+    (
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  try {
+    const response = getRequestToCarto(query);
+    return response;
+  } catch(error) {
+    throw error;
   }
 };
 
@@ -245,36 +241,29 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   retailer.submission_date = new Date();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
-  if(validatePhaRetailer(retailer)) {
-    const fields: string[] = [];
-    const fieldValues: string[] = [];
-    Object.keys(retailer).forEach((key: string) => {
-      if (key !== 'longitude' && key !== 'latitude') {
-        fields.push(key);
-        fieldValues.push(retailer[key]);
-      }
-    });
-    const query = `
-    INSERT INTO ${PHA_RETAILER_TABLE}
-      (
-        geom,
-        ${`${fields.join(', ')}`}
-      )
-      VALUES 
-      (
-        ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
-        ${`'${fieldValues.join('\', \'')}'`}
-      )`;
-    try{
-      const response = getRequestToCarto(query);
-      return response;
-    } catch (error) {
-      throw error;
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push(key);
+      fieldValues.push(retailer[key]);
     }
-  } else {
-    const errorString = validatePhaRetailer.errors?.map((error) => {
-      return `${error.instancePath} ${error.message}`;
-    }).join('\n');
-    throw new BadRequestError(errorString);
+  });
+  const query = `
+  INSERT INTO ${PHA_RETAILER_TABLE}
+    (
+      geom,
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  try{
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
   }
 }

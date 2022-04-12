@@ -1,3 +1,4 @@
+import { validationErrorToString } from '../utils';
 import { NextFunction, Request, Response } from 'express';
 import { FiltersInterface } from '../@types';
 import BadRequestError from '../errors/BadRequestError';
@@ -9,5 +10,5 @@ export const filtersMiddleware = (req: Request, res: Response, next: NextFunctio
     next();
     return;
   }
-  next(new BadRequestError(validateFilters.errors?.['0'].message?.toString()));
+  next(new BadRequestError(validationErrorToString(validateFilters)));
 };

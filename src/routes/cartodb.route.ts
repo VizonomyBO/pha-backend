@@ -16,6 +16,8 @@ import {
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
+import { phaIndividualMiddleware } from '../middlewares/phaIndividualMiddleware';
+import { phaRetailerMiddleware } from '../middlewares/phaRetailerMiddleware';
 import ImageUploadService from '../services/ImageUpload.service';
 import { generateRandomNameWithExtension } from '../utils';
 
@@ -133,7 +135,7 @@ router.get('/profile/:id', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-router.post('/pha-individual', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   try {
@@ -146,7 +148,7 @@ router.post('/pha-individual', async (req: Request, res: Response, next: NextFun
 
 const upload = ImageUploadService.getUploadMultiple();
 
-router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFiles, res: Response, next: NextFunction) => {
   upload(req, res, async (err: string | Multer.MulterError | Error) => {
     if (err) {
       if (err instanceof Multer.MulterError) {

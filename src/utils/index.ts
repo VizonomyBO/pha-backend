@@ -1,3 +1,5 @@
+import { ValidateFunction } from "ajv";
+
 export const generateRandomName = (): string => {
   const randomName = Math.random()
     .toString(36)
@@ -11,4 +13,12 @@ export const generateRandomNameWithExtension = (extension: string): string => {
 
 export const isImageMymeType = (mimeType: string): boolean => {
   return mimeType.startsWith('image/');
+}
+
+export const validationErrorToString = (validator: ValidateFunction) => {
+  let errorMessage: string = "";
+  validator.errors?.forEach((error) => {
+    errorMessage += "[" + error.instancePath + "]" + " " + error.message;
+  });
+  return errorMessage;
 }
