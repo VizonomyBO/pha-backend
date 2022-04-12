@@ -21,6 +21,7 @@ import {
   buildFilterQueries,
   getBadgeQuery,
   getIndividualQuery,
+  getMapQuery,
   getRetailerQuery,
   getRowsOnUnion,
   getUnionQuery
@@ -75,6 +76,21 @@ const getRequestToTokenCarto = async (queries: string[]) => {
       }
     );
     return response.data;
+  } catch(error) {
+    throw error;
+  }
+}
+
+export const mapQuery = async (filters: FiltersInterface, queryParams: QueryParams) => {
+  logger.info("executing function: sideBar");
+  try {
+    const unionQuery = getMapQuery(filters, queryParams);
+    logger.info(`executing query: ${unionQuery}`);
+    const response = await getRequestToCarto(unionQuery);
+    return {
+      rows: response.rows.slice(0, queryParams.limit),
+      hasNextPage: response.rows.length > queryParams.limit
+    };
   } catch(error) {
     throw error;
   }

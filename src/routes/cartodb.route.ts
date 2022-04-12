@@ -12,7 +12,8 @@ import {
   getProfile,
   getRetailer,
   insertIntoPHAIndividual,
-  insertIntoPHARetailer
+  insertIntoPHARetailer,
+  mapQuery
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -205,6 +206,23 @@ router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: 
       next(error);
     }
   });
+});
+
+router.post('/map-table', async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const mapTable = body as FiltersInterface;
+  const { page = 1, limit = 10 } = req.query;
+  const params = {
+    page: +page,
+    limit: +limit,
+  } as QueryParams;
+  try {
+    const data = await mapQuery(mapTable, params);
+    res.send({ data: data, sucess: true });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 });
 
 export default router;

@@ -1,41 +1,60 @@
 import { FiltersInterface, QueryParams } from '../@types';
 import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE } from '../constants';
 
-export const buildFilterQueries = (filters: FiltersInterface) => {
+export const whereFilterQueries = (filters: FiltersInterface) => {
+  const where: string[][] = [];
+  if (filters.categories) {
+    const row: string[] = [];
+    filters.categories.forEach(category => {
+      row.push(`${category} = 'Yes'`);
+    });
+    if (row.length) {
+      where.push(row);
+    }
+  }
+  if (filters.accesibility) {
+    const row: string[] = [];
+    filters.accesibility.forEach(accessibility => {
+      row.push(`${accessibility} = 'Yes'`);
+    });
+    if (row.length) {
+      where.push(row);
+    }
+  }
+  let suffix = '';
+  if (filters.badges) {
+    // TODO: logic for badges (next pr) pray for Lua
+  }
+  if (where.length) {
+    console.log(where);
+    const rows = where.map(row => `(${row.join(' OR ')})`);
+    suffix = `WHERE ${rows.join(' AND ')}`;
+  }
+  return suffix;
+};
+
+export const  buildFilterQueries = (filters: FiltersInterface) => {
   const queries = {};
   filters.dataSources.forEach(dataSource => {
-    const where: string[][] = [];
-    if (filters.categories) {
-      const row: string[] = [];
-      filters.categories.forEach(category => {
-        row.push(`${category} = 'Yes'`);
-      });
-      if (row.length) {
-        where.push(row);
-      }
-    }
-    if (filters.accesibility) {
-      const row: string[] = [];
-      filters.accesibility.forEach(accessibility => {
-        row.push(`${accessibility} = 'Yes'`);
-      });
-      if (row.length) {
-        where.push(row);
-      }
-    }
-    let suffix = '';
-    if (filters.badges) {
-      // TODO: logic for badges (next pr) pray for Lua
-    }
-    if (where.length) {
-      console.log(where);
-      const rows = where.map(row => `(${row.join(' OR ')})`);
-      suffix = `WHERE ${rows.join(' AND ')}`;
-    }
+    const suffix = whereFilterQueries(filters);
     queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
   });
   return queries;
 };
+
+export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
+  const fields = ['retailer_id', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
+  const where = whereFilterQueries(filters);
+  const queries: string[] = [];
+  const { page, limit } = queryParams;
+  const offset = (page - 1) * limit;
+  const limitQuery = ` ORDER BY name LIMIT ${limit + 1} OFFSET ${offset}`;
+  filters.dataSources.forEach(source => {
+    queries.push(`SELECT ${fields.join(',')}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+  });
+  const unionQuery = queries.join(' UNION ALL ') + ` ${where} ${limitQuery} `;
+  return unionQuery;
+}
 
 export const getBadgeQuery = (id: string) => {
   const query = `
