@@ -24,6 +24,47 @@
     }
   },
   "paths": {
+    "/cartodb/pha-individual/{id}": {
+      "put": {
+        "tags": ["CartoDB"],
+        "summary": "Update a individual",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of individual to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-individual"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
     "/cartodb/pha-individual": {
       "post": {
         "tags": ["CartoDB"],

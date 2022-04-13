@@ -29,6 +29,11 @@ export default interface ResponseError extends Error {
   stack?: any;
 };
 
+export interface Propierties {
+  key: string,
+  value: string,
+}
+
 type DataSources = 'retailers_pha' | 'retailers_osm' | 'retailers_usda';
 interface FiltersInterface {
   categories: string[],
