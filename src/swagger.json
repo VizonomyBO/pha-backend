@@ -63,6 +63,30 @@
             "description": "Failed. Bad post data."
           }
         }
+      },
+      "get": {
+        "tags": ["CartoDB"],
+        "summary": "Get a individual",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of individual to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
       }
     },
     "/cartodb/pha-individual": {
@@ -260,7 +284,7 @@
         }
       }
     },
-    "/cartodb//profile/:id": {
+    "/cartodb//profile/{id}": {
       "get": {
         "tags": ["CartoDB"],
         "summary": "Get profile of a retailer",

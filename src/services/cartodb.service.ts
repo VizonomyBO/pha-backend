@@ -164,6 +164,21 @@ export const getProfile = async (id: string) => {
   }
 }
 
+export const getPHAIndividual = async (individualId: string) => {
+  logger.info("executing function: getPHAIndividual");
+  logger.debug(`with params: ${individualId}`);
+  try {
+    const query = `SELECT * FROM ${PHA_INDIVIDUAL} WHERE individual_id = '${individualId}'`;
+    const response = await getRequestToCarto(query);
+    if (response.rows.length == 0) {
+      throw new NotFoundError("Individual not found");
+    }
+    return response.rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   logger.info("executing function: insertIntoPHAIndividual");
   const params = JSON.stringify(individual);

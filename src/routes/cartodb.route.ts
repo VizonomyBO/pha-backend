@@ -16,6 +16,7 @@ import {
   mapQuery,
   updateIndividual,
   updatePHARetailer,
+  getPHAIndividual,
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -149,12 +150,22 @@ router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, r
   }
 });
 
-router.put('/pha-individual/:id',async (req:Request, res: Response, next: NextFunction) => {
+router.put('/pha-individual/:id', async (req:Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   const individualId: string = req.params.id;
   try {
     const response = await updateIndividual(individual, individualId);
+    res.json({data: response, sucess: true});
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/pha-individual/:id', async (req:Request, res: Response, next: NextFunction) => {
+  const individualId: string = req.params.id;
+  try {
+    const response = await getPHAIndividual(individualId);
     res.json({data: response, sucess: true});
   } catch (error) {
     next(error);
