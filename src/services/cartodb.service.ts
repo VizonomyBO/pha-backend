@@ -1,13 +1,11 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { FiltersInterface, QueryParams } from '../@types';
+import { FiltersInterface, QueryParams, Propierties } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import BadRequestError from '../errors/BadRequestError';
 import NotFoundError from '../errors/NotFoundError';
 import AuthenticationError from '../errors/AuthenticationError';
 import config from '../config';
-import validatePhaRetailer from '../validation/PhaRetailer';
-import validatePhaIndividual from '../validation/PhaIndividual';
 import {  
   CONNECTION_NAME,
   PHA_RETAILER_TABLE,
@@ -283,3 +281,31 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
     throw error;
   }
 }
+
+export const updateIndividual = (individual: PhaIndividual, individualId: string) => {
+  logger.info("executing function: updateIndividual");
+  const params = JSON.stringify(individual);
+  logger.debug(`with params: ${params}`);
+  const fields: Propierties[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: individual[key]
+      });
+    }
+  });
+  const query = `
+  UPDATE ${PHA_INDIVIDUAL}
+  SET
+    ${`${fields.map((elem) => {
+      return `${elem.key} =  '${elem.value}'`;
+    }).join(', ')}`}
+  WHERE individual_id = '${individualId}';`;  
+  try{
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
