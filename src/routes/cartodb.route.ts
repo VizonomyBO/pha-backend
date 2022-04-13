@@ -142,7 +142,7 @@ router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, r
   const individual = body as PhaIndividual;
   try {
     const data = await insertIntoPHAIndividual(individual);
-    res.send({ data: data, sucess: true });
+    res.send({ data: data, success: true });
   } catch (error) {
     next(error);
   }
@@ -154,7 +154,7 @@ router.put('/pha-individual/:id',async (req:Request, res: Response, next: NextFu
   const individualId: string = req.params.id;
   try {
     const response = await updateIndividual(individual, individualId);
-    res.json({data: response, sucess: true});
+    res.json({data: response, success: true});
   } catch (error) {
     next(error);
   }
@@ -216,7 +216,7 @@ router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFil
     const retailer = body as PhaRetailer;
     try {
       const data = await insertIntoPHARetailer(retailer);
-      res.send({ data: data, sucess: true });
+      res.send({ data: data, success: true });
     } catch (error) {
       next(error);
     }
@@ -233,7 +233,7 @@ router.post('/map-table', async (req: Request, res: Response, next: NextFunction
   } as QueryParams;
   try {
     const data = await mapQuery(mapTable, params);
-    res.send({ data: data, sucess: true });
+    res.send({ data: data, success: true });
   } catch (error) {
     console.log(error);
     next(error);
