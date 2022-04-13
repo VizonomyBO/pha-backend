@@ -223,7 +223,7 @@ router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFil
   });
 });
 
-router.post('/map-table', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/map-table', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const mapTable = body as FiltersInterface;
   const { page = 1, limit = 10 } = req.query;

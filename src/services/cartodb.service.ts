@@ -51,34 +51,6 @@ export const getOAuthToken = async (): Promise<string> => {
   }
 };
 
-const getRequestToTokenCarto = async (queries: string[]) => {
-  logger.info("executing function: getRequestToTokenCarto");
-  const params = JSON.stringify(queries);
-  logger.debug(`with params: ${params}`);
-  try {
-    const token = await getOAuthToken();
-    const response = await axios.post(
-      `${CARTO_API}/${CARTO_API_VERSION}/tokens?access_token=${token}`,
-      {
-        grants: queries.map(query => ({
-          connection_name: CONNECTION_NAME,
-          source: query
-        })),
-        referers: [],
-        allowed_apis: ['sql', 'maps', 'imports']
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    return response.data;
-  } catch(error) {
-    throw error;
-  }
-}
-
 export const mapQuery = async (filters: FiltersInterface, queryParams: QueryParams) => {
   logger.info("executing function: sideBar");
   try {

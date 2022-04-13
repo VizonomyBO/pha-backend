@@ -1,6 +1,10 @@
-import { FiltersInterface, QueryParams } from '../@types';
+import { FiltersInterface, GoogleBbox, QueryParams } from '../@types';
 import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE } from '../constants';
 
+const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
+  const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
+  return `POLYGON((${minLng} ${minLat}, ${minLng} ${maxLat}, ${maxLng} ${maxLat}, ${maxLng} ${minLat}, ${minLng} ${minLat}))`;
+};
 export const whereFilterQueries = (filters: FiltersInterface) => {
   const where: string[][] = [];
   if (filters.categories) {
@@ -22,8 +26,8 @@ export const whereFilterQueries = (filters: FiltersInterface) => {
     }
   }
   let suffix = '';
-  if (filters.badges) {
-    // TODO: logic for badges (next pr) pray for Lua
+  if (filters.bbox) {
+    where.push([`ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`]);
   }
   if (where.length) {
     console.log(where);
@@ -43,7 +47,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 };
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
-  const fields = ['retailer_id', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
+  const fields = ['retailer_id', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
   const where = whereFilterQueries(filters);
   const queries: string[] = [];
   const { page, limit } = queryParams;
