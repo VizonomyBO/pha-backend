@@ -35,9 +35,12 @@ export interface Propierties {
 }
 
 type DataSources = 'retailers_pha' | 'retailers_osm' | 'retailers_usda';
-interface FiltersInterface {
+
+export type GoogleBbox = {xmin: number, ymin: number, xmax: number, ymax: number};
+export interface FiltersInterface {
   categories: string[],
   accesibility: string[],
   dataSources: string[],
-  badges: string[]
+  badges: string[],
+  bbox?: GoogleBbox
 };
