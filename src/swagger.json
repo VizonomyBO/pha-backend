@@ -219,6 +219,47 @@
         }
       }
     },
+    "/cartodb/pha-retailer/{id}": {
+      "put": {
+        "tags": ["CartoDB"],
+        "summary": "Update a retailer",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of retailer to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-retailer"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
     "/cartodb//profile/:id": {
       "get": {
         "tags": ["CartoDB"],

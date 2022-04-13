@@ -282,6 +282,34 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   }
 }
 
+export const updatePHARetailer = (retailer: PhaRetailer, retailerId: string) => {
+  logger.info("executing function: updatePHARetailer");
+  const params = JSON.stringify(retailer);
+  logger.debug(`with params: ${params}`);
+  const fields: Propierties[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: retailer[key]
+      });
+    }
+  });
+  const query = `
+  UPDATE ${PHA_RETAILER_TABLE}
+  SET
+    ${`${fields.map((elem) => {
+      return `${elem.key} =  '${elem.value}'`;
+    }).join(', ')}`}
+  WHERE retailer_id = '${retailerId}';`;  
+  try{
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const updateIndividual = (individual: PhaIndividual, individualId: string) => {
   logger.info("executing function: updateIndividual");
   const params = JSON.stringify(individual);

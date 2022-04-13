@@ -15,6 +15,7 @@ import {
   insertIntoPHARetailer,
   mapQuery,
   updateIndividual,
+  updatePHARetailer,
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -221,6 +222,18 @@ router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFil
       next(error);
     }
   });
+});
+
+router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  const body = req.body;
+  const retailerId = req.params.id;
+  const retailer = body as PhaRetailer;
+  try {
+    const data = await updatePHARetailer(retailer, retailerId);
+    res.json({ data: data, sucess: true });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post('/map-table', async (req: Request, res: Response, next: NextFunction) => {
