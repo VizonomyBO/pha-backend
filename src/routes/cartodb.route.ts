@@ -18,6 +18,7 @@ import {
   updatePHARetailer,
   getPHAIndividual,
   getPHARetailerCSV,
+  getPHAIndividualCSV,
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -146,6 +147,18 @@ router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, r
   try {
     const data = await insertIntoPHAIndividual(individual);
     res.send({ data: data, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/pha-individual/download', async (req: Request, res: Response, next: NextFunction) => {
+  const body = req.body;
+  try {
+    const response =  await getPHAIndividualCSV(body.individualIds);
+    res.header('Content-Type', 'text/csv');
+    res.attachment('PHA-individual.csv');
+    res.send(response);
   } catch (error) {
     next(error);
   }

@@ -18,6 +18,7 @@ import {
   getBadgeQuery,
   getIndividualQuery,
   getMapQuery,
+  getPHAIndividualCSVQuery,
   getPHAIndividualQuery,
   getPHARetailerCSVQuery,
   getProfileQuery,
@@ -273,6 +274,21 @@ export const getPHARetailerCSV = async (retailerIds: string[]) => {
   const params = JSON.stringify(retailerIds);
   logger.debug(`with params: ${params}`);
   const query = getPHARetailerCSVQuery(retailerIds);
+  try{
+    const response = await getRequestToCarto(query);
+    const json2csv = new Parser({fields: Object.keys(response.rows[0])});
+    const csv = json2csv.parse(response.rows);
+    return csv;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getPHAIndividualCSV = async (individualIds: string[]) => {
+  logger.info("executing function: getPHAIndividualCSV");
+  const params = JSON.stringify(individualIds);
+  logger.debug(`with params: ${params}`);
+  const query = getPHAIndividualCSVQuery(individualIds);
   try{
     const response = await getRequestToCarto(query);
     const json2csv = new Parser({fields: Object.keys(response.rows[0])});

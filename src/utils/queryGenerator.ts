@@ -252,3 +252,11 @@ export const getPHARetailerCSVQuery = (retailerIds: string[]): string => {
     ${retailerIds.length ? `WHERE retailer_id IN (${retailerIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
   return query;
 }
+
+export const getPHAIndividualCSVQuery = (individualIds: string[]): string => {
+  const query = `
+    SELECT *
+    FROM ${PHA_INDIVIDUAL}
+    ${individualIds.length ? `WHERE individual_id IN (${individualIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
+  return query;
+}
