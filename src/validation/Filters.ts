@@ -1,31 +1,56 @@
-import Ajv, {JTDSchemaType, ValidateFunction} from 'ajv/dist/jtd';
+import Ajv, {JSONSchemaType, ValidateFunction} from 'ajv';
 import { FiltersInterface } from '../@types';
 
 const ajv = new Ajv({timestamp: "date"});
 
-const schema: JTDSchemaType<FiltersInterface> = {
+const schema: JSONSchemaType<FiltersInterface> = {
+  type: 'object',
   properties: {
     categories: {
-      elements: {
-        type: "string"
+      type: 'array',
+      items: {
+        type: 'string',
       }
     },
     accesibility: {
-      elements: {
-        type: "string"
+      type: 'array',
+      items: {
+        type: 'string',
       }
     },
     dataSources: {
-      elements: {
-        type: "string"
+      type: 'array',
+      items: {
+        type: 'string',
       }
     },
     badges: {
-      elements: {
-        type: "string"
+      type: 'array',
+      items: {
+        type: 'string',
       }
+    },
+    bbox: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        xmin: {
+          type: 'number'
+        },
+        ymin: {
+          type: 'number'
+        },
+        xmax: {
+          type: 'number'
+        },
+        ymax: {
+          type: 'number'
+        }
+      },
+      required: ['xmin', 'ymin', 'xmax', 'ymax']
     }
   },
+  required: ['categories', 'accesibility', 'badges', 'dataSources']
 };
 
 const validateFilters: ValidateFunction<FiltersInterface> = ajv.compile(schema);
