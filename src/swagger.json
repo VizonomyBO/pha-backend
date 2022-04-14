@@ -306,6 +306,36 @@
         }
       }
     },
+    "/cartodb/pha-retailer/download": {
+      "post": {
+        "tags": ["CartoDB"],
+        "summary": "set of retailer id to download csv",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/RetailerIds"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": ["Auth"],
@@ -615,6 +645,17 @@
         },
         "password": {
           "type": "string"
+        }
+      }
+    },
+    "RetailerIds": {
+      "type:": "object",
+      "properties": {
+        "retailerIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

@@ -244,3 +244,11 @@ export const getProfileQuery = (retailerId: string) => {
   const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${retailerId}'`;
   return query;
 }
+
+export const getPHARetailerCSVQuery = (retailerIds: string[]): string => {
+  const query = `
+    SELECT *
+    FROM ${PHA_RETAILER_TABLE}
+    ${retailerIds.length ? `WHERE retailer_id IN (${retailerIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
+  return query;
+}

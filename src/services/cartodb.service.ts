@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Parser } from 'json2csv';
 import { v4 as uuidv4 } from 'uuid';
 import { FiltersInterface, QueryParams, Propierties } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
@@ -18,6 +19,7 @@ import {
   getIndividualQuery,
   getMapQuery,
   getPHAIndividualQuery,
+  getPHARetailerCSVQuery,
   getProfileQuery,
   getRetailerQuery,
   getRowsOnUnion,
@@ -265,3 +267,18 @@ export const updateIndividual = (individual: PhaIndividual, individualId: string
     throw error;
   }
 };
+
+export const getPHARetailerCSV = async (retailerIds: string[]) => {
+  logger.info("executing function: getPHARetailerCSV");
+  const params = JSON.stringify(retailerIds);
+  logger.debug(`with params: ${params}`);
+  const query = getPHARetailerCSVQuery(retailerIds);
+  try{
+    const response = await getRequestToCarto(query);
+    const json2csv = new Parser({fields: Object.keys(response.rows[0])});
+    const csv = json2csv.parse(response.rows);
+    return csv;
+  } catch (error) {
+    throw error;
+  }
+}
