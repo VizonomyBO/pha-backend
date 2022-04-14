@@ -1,4 +1,5 @@
-import { FiltersInterface, GoogleBbox, QueryParams } from '../@types';
+import { PhaIndividual, PhaRetailer } from '@/@types/database';
+import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
 import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
@@ -150,4 +151,96 @@ export const generateWhereArray = (queryParams: QueryParams) => {
     where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
   }
   return {where, suffix};
+}
+
+export const getPHAIndividualQuery = (individualId: string) => {
+  const query = `SELECT * FROM ${PHA_INDIVIDUAL} WHERE individual_id = '${individualId}'`;
+  return query;
+}
+
+export const insertPHAIndividualQuery = (individual: PhaIndividual) => {
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    fields.push(key);
+    fieldValues.push(individual[key]);
+  });
+  const query = `
+  INSERT INTO ${PHA_INDIVIDUAL}
+    (
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  return query;
+}
+
+export const insertPHARetailerQuery = (retailer: PhaRetailer) => {
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push(key);
+      fieldValues.push(retailer[key]);
+    }
+  });
+  const query = `
+  INSERT INTO ${PHA_RETAILER_TABLE}
+    (
+      geom,
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  return query;
+}
+
+export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string) => {
+  const fields: Propierties[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: retailer[key]
+      });
+    }
+  });
+  const query = `
+  UPDATE ${PHA_RETAILER_TABLE}
+  SET
+    ${`${fields.map((elem) => {
+      return `${elem.key} =  '${elem.value}'`;
+    }).join(', ')}`}
+  WHERE retailer_id = '${retailerId}';`; 
+  return query;
+}
+
+export const updatePHAIndividualQuery = (individual: PhaIndividual, individualId: string) => {
+  const fields: Propierties[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: individual[key]
+      });
+    }
+  });
+  const query = `
+    UPDATE ${PHA_INDIVIDUAL}
+    SET
+      ${`${fields.map((elem) => {
+        return `${elem.key} =  '${elem.value}'`;
+      }).join(', ')}`}
+    WHERE individual_id = '${individualId}';`;
+  return query;
+}
+
+export const getProfileQuery = (retailerId: string) => {
+  const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${retailerId}'`;
+  return query;
 }

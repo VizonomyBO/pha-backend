@@ -2,14 +2,11 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { FiltersInterface, QueryParams, Propierties } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
-import BadRequestError from '../errors/BadRequestError';
 import NotFoundError from '../errors/NotFoundError';
 import AuthenticationError from '../errors/AuthenticationError';
 import config from '../config';
 import {  
   CONNECTION_NAME,
-  PHA_RETAILER_TABLE,
-  PHA_INDIVIDUAL,
   CARTO_AUTH_URL,
   CARTO_API,
   CARTO_API_VERSION
@@ -20,9 +17,15 @@ import {
   getBadgeQuery,
   getIndividualQuery,
   getMapQuery,
+  getPHAIndividualQuery,
+  getProfileQuery,
   getRetailerQuery,
   getRowsOnUnion,
-  getUnionQuery
+  getUnionQuery,
+  insertPHAIndividualQuery,
+  insertPHARetailerQuery,
+  updatePHAIndividualQuery,
+  updatePHARetailerQuery
 } from '../utils/queryGenerator';
 
 export const getOAuthToken = async (): Promise<string> => {
@@ -124,8 +127,8 @@ export const getProfile = async (id: string) => {
   logger.info("executing function: getProfile");
   const params = JSON.stringify(id);
   logger.debug(`with params: ${params}`);
-  try {
-    const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${id}'`;
+  const query = getProfileQuery(id);
+  try {  
     const response = await getRequestToCarto(query);
     if (response.rows.length == 0) {
       throw new NotFoundError("Retailer not found");
@@ -140,7 +143,7 @@ export const getPHAIndividual = async (individualId: string) => {
   logger.info("executing function: getPHAIndividual");
   logger.debug(`with params: ${individualId}`);
   try {
-    const query = `SELECT * FROM ${PHA_INDIVIDUAL} WHERE individual_id = '${individualId}'`;
+    const query = getPHAIndividualQuery(individualId);
     const response = await getRequestToCarto(query);
     if (response.rows.length == 0) {
       throw new NotFoundError("Individual not found");
@@ -158,21 +161,7 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   individual.submission_date = new Date();
   individual.submission_status = 'Pending';
   individual.individual_id = uuidv4();
-  const fields: string[] = [];
-  const fieldValues: string[] = [];
-  Object.keys(individual).forEach((key: string) => {
-    fields.push(key);
-    fieldValues.push(individual[key]);
-  });
-  const query = `
-  INSERT INTO ${PHA_INDIVIDUAL}
-    (
-      ${`${fields.join(', ')}`}
-    )
-    VALUES 
-    (
-      ${`'${fieldValues.join('\', \'')}'`}
-    )`;
+  const query = insertPHAIndividualQuery(individual);
   try {
     const response = getRequestToCarto(query);
     return response;
@@ -242,25 +231,7 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   retailer.submission_date = new Date();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
-  const fields: string[] = [];
-  const fieldValues: string[] = [];
-  Object.keys(retailer).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
-      fields.push(key);
-      fieldValues.push(retailer[key]);
-    }
-  });
-  const query = `
-  INSERT INTO ${PHA_RETAILER_TABLE}
-    (
-      geom,
-      ${`${fields.join(', ')}`}
-    )
-    VALUES 
-    (
-      ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
-      ${`'${fieldValues.join('\', \'')}'`}
-    )`;
+  const query = insertPHARetailerQuery(retailer);
   try{
     const response = getRequestToCarto(query);
     return response;
@@ -273,22 +244,7 @@ export const updatePHARetailer = (retailer: PhaRetailer, retailerId: string) => 
   logger.info("executing function: updatePHARetailer");
   const params = JSON.stringify(retailer);
   logger.debug(`with params: ${params}`);
-  const fields: Propierties[] = [];
-  Object.keys(retailer).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
-      fields.push({
-        key: key,
-        value: retailer[key]
-      });
-    }
-  });
-  const query = `
-  UPDATE ${PHA_RETAILER_TABLE}
-  SET
-    ${`${fields.map((elem) => {
-      return `${elem.key} =  '${elem.value}'`;
-    }).join(', ')}`}
-  WHERE retailer_id = '${retailerId}';`;  
+  const query = updatePHARetailerQuery(retailer, retailerId); 
   try{
     const response = getRequestToCarto(query);
     return response;
@@ -301,22 +257,7 @@ export const updateIndividual = (individual: PhaIndividual, individualId: string
   logger.info("executing function: updateIndividual");
   const params = JSON.stringify(individual);
   logger.debug(`with params: ${params}`);
-  const fields: Propierties[] = [];
-  Object.keys(individual).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
-      fields.push({
-        key: key,
-        value: individual[key]
-      });
-    }
-  });
-  const query = `
-  UPDATE ${PHA_INDIVIDUAL}
-  SET
-    ${`${fields.map((elem) => {
-      return `${elem.key} =  '${elem.value}'`;
-    }).join(', ')}`}
-  WHERE individual_id = '${individualId}';`;  
+  const query = updatePHAIndividualQuery(individual, individualId);
   try{
     const response = getRequestToCarto(query);
     return response;
