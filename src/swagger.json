@@ -24,47 +24,6 @@
     }
   },
   "paths": {
-    "/cartodb/pha-individual/{id}": {
-      "put": {
-        "tags": ["CartoDB"],
-        "summary": "Update a individual",
-        "security": [
-          {
-            "ApiKey": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "id of individual to update.",
-            "schema": {
-              "$ref": "#/definitions/id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/definitions/Pha-individual"
-              }
-            }
-          }
-        },
-        "produces": ["application/json"],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Failed. Bad post data."
-          }
-        }
-      }
-    },
     "/cartodb/pha-individual": {
       "post": {
         "tags": ["CartoDB"],
@@ -138,6 +97,101 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/cartodb/pha-individual/{id}": {
+      "put": {
+        "tags": ["CartoDB"],
+        "summary": "Update a individual",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of individual to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-individual"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      },
+      "get": {
+        "tags": ["CartoDB"],
+        "summary": "Get a individual",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of individual to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
+    "/cartodb/pha-individual/download": {
+      "post": {
+        "tags": ["CartoDB"],
+        "summary": "set of individual id to download csv",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/IndividualIds"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
           }
         }
       }
@@ -219,7 +273,48 @@
         }
       }
     },
-    "/cartodb//profile/:id": {
+    "/cartodb/pha-retailer/{id}": {
+      "put": {
+        "tags": ["CartoDB"],
+        "summary": "Update a retailer",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "id of retailer to update.",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Pha-retailer"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
+    "/cartodb//profile/{id}": {
       "get": {
         "tags": ["CartoDB"],
         "summary": "Get profile of a retailer",
@@ -237,6 +332,36 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/cartodb/pha-retailer/download": {
+      "post": {
+        "tags": ["CartoDB"],
+        "summary": "set of retailer id to download csv",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/RetailerIds"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
           }
         }
       }
@@ -550,6 +675,28 @@
         },
         "password": {
           "type": "string"
+        }
+      }
+    },
+    "RetailerIds": {
+      "type:": "object",
+      "properties": {
+        "retailerIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IndividualIds": {
+      "type:": "object",
+      "properties": {
+        "individualIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
