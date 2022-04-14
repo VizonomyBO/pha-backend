@@ -53,8 +53,8 @@ export interface PhaRetailer {
   contact_patron: string,
   general_store: string,
   grocery_store: string,
-  submission_date: Date,
-  submission_status: string,
+  submission_date?: Date,
+  submission_status?: string,
   imagelinks: string,
 }
 

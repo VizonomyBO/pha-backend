@@ -99,12 +99,6 @@ const schema: JTDSchemaType<PhaRetailer> = {
     grocery_store: {
       type: "string"
     },
-    submission_date: {
-      type: "timestamp"
-    },
-    submission_status: {
-      type: "string"
-    },
     imagelinks: {
       type: "string"
     },
@@ -124,6 +118,12 @@ const schema: JTDSchemaType<PhaRetailer> = {
     },
     mon_close: {
       type: "string",
+    },
+    submission_date: {
+      type: "timestamp"
+    },
+    submission_status: {
+      type: "string"
     },
     tues_open: {
       type: "string",
