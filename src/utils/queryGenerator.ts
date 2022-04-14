@@ -1,4 +1,5 @@
-import { FiltersInterface, GoogleBbox, QueryParams } from '../@types';
+import { PhaIndividual, PhaRetailer } from '@/@types/database';
+import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
 import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
@@ -150,4 +151,236 @@ export const generateWhereArray = (queryParams: QueryParams) => {
     where.push(`submission_date BETWEEN '${startDate}' AND '${endDate}'`);
   }
   return {where, suffix};
+}
+
+export const getPHAIndividualQuery = (individualId: string) => {
+  const query = `SELECT * FROM ${PHA_INDIVIDUAL} WHERE individual_id = '${individualId}'`;
+  return query;
+}
+
+export const insertPHAIndividualQuery = (individual: PhaIndividual) => {
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    fields.push(key);
+    fieldValues.push(individual[key]);
+  });
+  const query = `
+  INSERT INTO ${PHA_INDIVIDUAL}
+    (
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  return query;
+}
+
+export const insertPHARetailerQuery = (retailer: PhaRetailer) => {
+  const fields: string[] = [];
+  const fieldValues: string[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push(key);
+      fieldValues.push(retailer[key]);
+    }
+  });
+  const query = `
+  INSERT INTO ${PHA_RETAILER_TABLE}
+    (
+      geom,
+      ${`${fields.join(', ')}`}
+    )
+    VALUES 
+    (
+      ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
+      ${`'${fieldValues.join('\', \'')}'`}
+    )`;
+  return query;
+}
+
+export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string) => {
+  const fields: Propierties[] = [];
+  Object.keys(retailer).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: retailer[key]
+      });
+    }
+  });
+  const query = `
+  UPDATE ${PHA_RETAILER_TABLE}
+  SET
+    ${`${fields.map((elem) => {
+      return `${elem.key} =  '${elem.value}'`;
+    }).join(', ')}`}
+  WHERE retailer_id = '${retailerId}';`; 
+  return query;
+}
+
+export const updatePHAIndividualQuery = (individual: PhaIndividual, individualId: string) => {
+  const fields: Propierties[] = [];
+  Object.keys(individual).forEach((key: string) => {
+    if (key !== 'longitude' && key !== 'latitude') {
+      fields.push({
+        key: key,
+        value: individual[key]
+      });
+    }
+  });
+  const query = `
+    UPDATE ${PHA_INDIVIDUAL}
+    SET
+      ${`${fields.map((elem) => {
+        return `${elem.key} =  '${elem.value}'`;
+      }).join(', ')}`}
+    WHERE individual_id = '${individualId}';`;
+  return query;
+}
+
+export const getProfileQuery = (retailerId: string) => {
+  const query = `SELECT * FROM ${PHA_RETAILER_TABLE} WHERE retailer_id = '${retailerId}'`;
+  return query;
+}
+
+export const getPHARetailerCSVQuery = (retailerIds: string[]): string => {
+  const query = `
+    SELECT
+      retailer_id,
+      ST_X(geom) as longitude,
+      ST_Y(geom) as latitude,
+      name,
+      address_1,
+      address_2,
+      phone,
+      city,
+      state,
+      zipcode,
+      sun_open,
+      sun_close,
+      mon_open,
+      mon_close,
+      tues_open,
+      tues_close,
+      wed_open,
+      wed_close,
+      thurs_open,
+      thurs_close,
+      fri_open,
+      fri_close,
+      sat_open,
+      sat_close,
+      website,
+      facebook,
+      instagram,
+      twitter,
+      email,
+      corner_store,
+      distribution,
+      farmers_market,
+      food_pantry,
+      food_co_op,
+      supermarket,
+      dollar_stores,
+      wic_accepted,
+      snap_accepted,
+      description,
+      availability,
+      quality,
+      visibility,
+      local,
+      produce_avail_store,
+      produce_avail_seasonally,
+      owner_photo,
+      owner_name,
+      contact_name,
+      contact_email,
+      contact_owner,
+      contact_patron,
+      general_store,
+      grocery_store,
+      submission_date,
+      submission_status,
+      imagelinks
+    FROM ${PHA_RETAILER_TABLE}
+    ${retailerIds.length ? `WHERE retailer_id IN (${retailerIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
+  return query;
+}
+
+export const getPHAIndividualCSVQuery = (individualIds: string[]): string => {
+  const query = `
+    SELECT
+      pi.individual_id,
+      pr.retailer_id,
+      pi.availability,
+      pi.quality,
+      pi.visibility,
+      pi.local,
+      pi.meets_need,
+      pi.produce_avail_store,
+      pi.contact_name,
+      pi.contact_email,
+      pi.contact_phone,
+      pi.contact_zipcode,
+      pi.submission_date,
+      pi.submission_status,
+      ST_X(pr.geom) as longitude,
+      ST_Y(pr.geom) as latitude,
+      pr.name,
+      pr.address_1,
+      pr.address_2,
+      pr.phone,
+      pr.city,
+      pr.state,
+      pr.zipcode,
+      pr.sun_open,
+      pr.sun_close,
+      pr.mon_open,
+      pr.mon_close,
+      pr.tues_open,
+      pr.tues_close,
+      pr.wed_open,
+      pr.wed_close,
+      pr.thurs_open,
+      pr.thurs_close,
+      pr.fri_open,
+      pr.fri_close,
+      pr.sat_open,
+      pr.sat_close,
+      pr.website,
+      pr.facebook,
+      pr.instagram,
+      pr.twitter,
+      pr.email,
+      pr.corner_store,
+      pr.distribution,
+      pr.farmers_market,
+      pr.food_pantry,
+      pr.food_co_op,
+      pr.supermarket,
+      pr.dollar_stores,
+      pr.wic_accepted,
+      pr.snap_accepted,
+      pr.description,
+      pr.availability,
+      pr.quality,
+      pr.visibility,
+      pr.local,
+      pr.produce_avail_store,
+      pr.produce_avail_seasonally,
+      pr.owner_photo,
+      pr.owner_name,
+      pr.contact_name,
+      pr.contact_email,
+      pr.contact_owner,
+      pr.contact_patron,
+      pr.general_store,
+      pr.grocery_store,
+      pr.imagelinks
+    FROM ${PHA_INDIVIDUAL} pi
+    JOIN ${PHA_RETAILER_TABLE} pr ON pi.retailer_id = pr.retailer_id
+    ${individualIds.length ? `WHERE pi.individual_id IN (${individualIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
+  return query;
 }

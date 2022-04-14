@@ -15,6 +15,10 @@ import {
   insertIntoPHARetailer,
   mapQuery,
   updateIndividual,
+  updatePHARetailer,
+  getPHAIndividual,
+  getPHARetailerCSV,
+  getPHAIndividualCSV,
 } from '../services/cartodb.service';
 import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -148,13 +152,35 @@ router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, r
   }
 });
 
-router.put('/pha-individual/:id',async (req:Request, res: Response, next: NextFunction) => {
+router.post('/pha-individual/download', async (req: Request, res: Response, next: NextFunction) => {
+  const body = req.body;
+  try {
+    const response =  await getPHAIndividualCSV(body.individualIds);
+    res.header('Content-Type', 'text/csv');
+    res.attachment('PHA-individual.csv');
+    res.send(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/pha-individual/:id', async (req:Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   const individualId: string = req.params.id;
   try {
     const response = await updateIndividual(individual, individualId);
     res.json({data: response, success: true});
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/pha-individual/:id', async (req:Request, res: Response, next: NextFunction) => {
+  const individualId: string = req.params.id;
+  try {
+    const response = await getPHAIndividual(individualId);
+    res.json({data: response, sucess: true});
   } catch (error) {
     next(error);
   }
@@ -221,6 +247,30 @@ router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFil
       next(error);
     }
   });
+});
+
+router.post('/pha-retailer/download', async (req: Request, res: Response, next: NextFunction) => {
+  const body = req.body;
+  try {
+    const response =  await getPHARetailerCSV(body.retailerIds);
+    res.header('Content-Type', 'text/csv');
+    res.attachment('PHA-retailer.csv');
+    res.send(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  const body = req.body;
+  const retailerId = req.params.id;
+  const retailer = body as PhaRetailer;
+  try {
+    const data = await updatePHARetailer(retailer, retailerId);
+    res.json({ data: data, sucess: true });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post('/map-table', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {
