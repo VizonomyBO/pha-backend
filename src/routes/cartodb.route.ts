@@ -20,12 +20,13 @@ import {
   getPHARetailerCSV,
   getPHAIndividualCSV,
 } from '../services/cartodb.service';
-import { FiltersInterface, QueryParams, RequestWithFiles } from '../@types';
+import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
 import { phaIndividualMiddleware } from '../middlewares/phaIndividualMiddleware';
 import { phaRetailerMiddleware } from '../middlewares/phaRetailerMiddleware';
 import ImageUploadService from '../services/ImageUpload.service';
-import { generateRandomNameWithExtension } from '../utils';
+import { uploadFilesToGoogle } from '../utils';
+import logger from '../utils/LoggerUtil';
 
 const router = express.Router();
 
@@ -186,9 +187,10 @@ router.get('/pha-individual/:id', async (req:Request, res: Response, next: NextF
   }
 });
 
-const upload = ImageUploadService.getUploadMultiple();
+const upload = ImageUploadService.getUploadFields();
 
-router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  console.log('my upload object ', JSON.stringify(upload), upload);
   upload(req, res, async (err: string | Multer.MulterError | Error) => {
     if (err) {
       if (err instanceof Multer.MulterError) {
@@ -204,49 +206,27 @@ router.post('/pha-retailer', [phaRetailerMiddleware], async (req: RequestWithFil
         return;
       }
     }
-
-    if (!req.files) {
-      res.status(400).json({ success: false, message: 'No files uploaded' });
-      return;
-    }
-
-    const promises = req.files.map((file) => {
-      return new Promise((resolve, reject) => {
-        const name = generateRandomNameWithExtension(file.mimetype.split('/')[1]);
-        const blob = ImageUploadService.getBucket().file(name);
-
-        const blobStream = blob.createWriteStream({
-          metadata: {
-            contentType: file.mimetype
-          },
-          resumable: false,
-          public: true
-        });
-
-        blobStream.on('error', err => {
-          console.error(err);
-          reject(err);
-        });
-
-        blobStream.on('finish', async () => {
-          const publicUrl = ImageUploadService.getPublicURL(blob.name);
-          resolve(publicUrl);
-        });
-        blobStream.end(file.buffer);
-      });
-    });
-    const imagelinks = await Promise.all(promises);
-
+    const imageLinksPromises = uploadFilesToGoogle(req.files[ImageUploadService.images]);
+    const ownerPhotosPromises = uploadFilesToGoogle(req.files[ImageUploadService.ownerimages]);
+    const [imagelinks, ownerimages] = [await Promise.all(imageLinksPromises), await Promise.all(ownerPhotosPromises)];
     const body = JSON.parse(req.body.json);
     body.imagelinks = imagelinks.join(',');
-    const retailer = body as PhaRetailer;
-    try {
-      const data = await insertIntoPHARetailer(retailer);
-      res.send({ data: data, success: true });
-    } catch (error) {
-      next(error);
-    }
+    body.owner_photo = ownerimages.join(',');
+    logger.info("BODY ", JSON.stringify(body))
+    req.body = body;
+    console.log(body.imagelinks, body.owner_photo);
+    next();
   });
+}, phaRetailerMiddleware ,async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const retailer = body as PhaRetailer;
+  try {
+    const data = await insertIntoPHARetailer(retailer);
+    res.send({ data: data, success: true });
+  } catch (error) {
+    console.log('here');
+    next(error);
+  }
 });
 
 router.post('/pha-retailer/download', async (req: Request, res: Response, next: NextFunction) => {

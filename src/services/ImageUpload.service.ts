@@ -13,6 +13,9 @@ class ImageUploadService {
   bucket: Bucket;
   multer;
 
+  images = 'images';
+  ownerimages = 'ownerimages';
+
   constructor() {
     const filePath = path.join(__dirname, '../config/service.account.json');
     if (!fs.existsSync(filePath)) {
@@ -51,6 +54,13 @@ class ImageUploadService {
 
   getUploadMultiple() {
     return this.multer.array('files');
+  }
+
+  getUploadFields() {
+    return this.multer.fields([
+      { name: this.images, maxCount: 5 },
+      { name: this.ownerimages, maxCount: 5 },
+    ]);
   }
 
 }
