@@ -48,7 +48,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 };
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
-  const fields = ['retailer_id', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
+  const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
   const where = whereFilterQueries(filters);
   const queries: string[] = [];
   const { page, limit } = queryParams;
