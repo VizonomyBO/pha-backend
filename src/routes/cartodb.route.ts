@@ -142,7 +142,7 @@ router.get('/profile/:id', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-router.post('/pha-individual', [phaIndividualMiddleware], async (req: Request, res: Response, next: NextFunction) => {
+router.post('/pha-individual', [], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   try {
@@ -217,7 +217,7 @@ router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: 
     console.log(body.imagelinks, body.owner_photo);
     next();
   });
-}, phaRetailerMiddleware ,async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+} ,async (req: RequestWithFiles, res: Response, next: NextFunction) => {
   const { body } = req;
   const retailer = body as PhaRetailer;
   try {
