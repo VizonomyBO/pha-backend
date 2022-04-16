@@ -136,7 +136,7 @@ export const generateWhereArray = (queryParams: QueryParams) => {
   const { page, limit, search, status, dateRange } = queryParams;
   const offset = (page - 1) * limit;
   const suffix = ` LIMIT ${queryParams.limit} OFFSET ${offset}`;
-  const where: string[] = [];
+  const where: string[] = [`submission_status != 'Deleted'`];
   if (search) {
     const upperSearch = search.toUpperCase();
     where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
