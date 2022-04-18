@@ -12,7 +12,9 @@ import {
   CARTO_API,
   CARTO_API_VERSION,
   PHA_RETAILER_TABLE,
-  PHA_INDIVIDUAL
+  PHA_INDIVIDUAL,
+  RETAILER,
+  INDIVIDUAL
 } from '../constants'
 import logger from '../utils/LoggerUtil';
 import { 
@@ -122,11 +124,11 @@ export const deleteJob = async (id: string, table: string, links: string, field:
   logger.info("executing function: deleteJob");
   try {
     const obj = {
-      'pha_retailer': {
+      [RETAILER]: {
         table: PHA_RETAILER_TABLE,
         id: 'retailer_id'
       },
-      'pha_individual': {
+      [INDIVIDUAL]: {
         table: PHA_INDIVIDUAL,
         id: 'individual_id'
       }

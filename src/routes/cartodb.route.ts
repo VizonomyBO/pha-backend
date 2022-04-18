@@ -26,6 +26,7 @@ import { filtersMiddleware } from '../middlewares/filtersMiddleware';
 import ImageUploadService from '../services/ImageUpload.service';
 import { uploadFilesToGoogle } from '../utils';
 import logger from '../utils/LoggerUtil';
+import { IMAGELINKS, INDIVIDUAL, OWNER_PHOTO, RETAILER } from '../constants';
 
 const router = express.Router();
 const upload = ImageUploadService.getUploadFields();
@@ -213,6 +214,7 @@ router.put('/pha-individual/:id', async (req: RequestWithFiles, res: Response, n
     const body = JSON.parse(req.body.json);
     const currentImageLinks = (body.imagelinks || '').split(',');
     body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
+    deleteJob(body.individual_id, INDIVIDUAL, currentImageLinks, IMAGELINKS);
     body.update_date = new Date();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;
@@ -317,8 +319,8 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
     const currentOwnerImages = (body.owner_photo || '').split(',');
     body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
     body.owner_photo = currentOwnerImages.concat(ownerimages).join(',');
-    deleteJob(body.retailer_id, 'retailer_id', currentImageLinks, 'imagelinks');
-    deleteJob(body.retailer_id, 'retailer_id', currentOwnerImages, 'owner_photo');
+    deleteJob(body.retailer_id, RETAILER, currentImageLinks, IMAGELINKS);
+    deleteJob(body.retailer_id, RETAILER, currentOwnerImages, OWNER_PHOTO);
     body.update_date = new Date();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;
