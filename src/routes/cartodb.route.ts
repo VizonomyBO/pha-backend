@@ -18,7 +18,8 @@ import {
   updatePHARetailer,
   getPHAIndividual,
   getPHARetailerCSV,
-  getPHAIndividualCSV
+  getPHAIndividualCSV,
+  deleteJob
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -27,6 +28,7 @@ import { uploadFilesToGoogle } from '../utils';
 import logger from '../utils/LoggerUtil';
 
 const router = express.Router();
+const upload = ImageUploadService.getUploadFields();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
@@ -190,7 +192,34 @@ router.post('/pha-individual/download', async (req: Request, res: Response, next
   }
 });
 
-router.put('/pha-individual/:id', async (req:Request, res: Response, next: NextFunction) => {
+router.put('/pha-individual/:id', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  uploadMany(req, res, async (err: string | Multer.MulterError | Error) => {
+    if (err) {
+      if (err instanceof Multer.MulterError) {
+        console.error(err);
+        res.status(400).send({ error: err.message, success: false });
+        return;
+      } else if (err.toString().includes('Invalid file type')) {
+        console.error(err);
+        res.status(400).send({ error: 'Invalid file type', success: false });
+        return;
+      } else if (err) {
+        res.status(500).send({ error: err, success: false });
+        return;
+      }
+    }
+    const imageLinksPromises = uploadFilesToGoogle(req.files);
+    const imagelinks = await Promise.all(imageLinksPromises);
+    const body = JSON.parse(req.body.json);
+    const currentImageLinks = (body.imagelinks || '').split(',');
+    body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
+    body.update_date = new Date();
+    logger.info("BODY ", JSON.stringify(body))
+    req.body = body;
+    next();
+  });
+}
+, async (req:Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const individual = body as PhaIndividual;
   const individualId: string = req.params.id;
@@ -212,7 +241,6 @@ router.get('/pha-individual/:id', async (req:Request, res: Response, next: NextF
   }
 });
 
-const upload = ImageUploadService.getUploadFields();
 
 router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
   upload(req, res, async (err: string | Multer.MulterError | Error) => {
@@ -266,6 +294,38 @@ router.post('/pha-retailer/download', async (req: Request, res: Response, next: 
 });
 
 router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, next: NextFunction) => {
+  upload(req, res, async (err: string | Multer.MulterError | Error) => {
+    if (err) {
+      if (err instanceof Multer.MulterError) {
+        console.error(err);
+        res.status(400).send({ error: err.message, success: false });
+        return;
+      } else if (err.toString().includes('Invalid file type')) {
+        console.error(err);
+        res.status(400).send({ error: 'Invalid file type', success: false });
+        return;
+      } else if (err) {
+        res.status(500).send({ error: err, success: false });
+        return;
+      }
+    }
+    const imageLinksPromises = uploadFilesToGoogle(req.files[ImageUploadService.images]);
+    const ownerPhotosPromises = uploadFilesToGoogle(req.files[ImageUploadService.ownerimages]);
+    const [imagelinks, ownerimages] = [await Promise.all(imageLinksPromises), await Promise.all(ownerPhotosPromises)];
+    const body = JSON.parse(req.body.json);
+    const currentImageLinks = (body.imagelinks || '').split(',');
+    const currentOwnerImages = (body.owner_photo || '').split(',');
+    body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
+    body.owner_photo = currentOwnerImages.concat(ownerimages).join(',');
+    deleteJob(body.retailer_id, 'retailer_id', currentImageLinks, 'imagelinks');
+    deleteJob(body.retailer_id, 'retailer_id', currentOwnerImages, 'owner_photo');
+    body.update_date = new Date();
+    logger.info("BODY ", JSON.stringify(body))
+    req.body = body;
+    console.log(body.imagelinks, body.owner_photo);
+    next();
+  });
+}, async (req: RequestWithFiles, res: Response, next: NextFunction) => {
   const body = req.body;
   const retailerId = req.params.id;
   const retailer = body as PhaRetailer;

@@ -1,6 +1,7 @@
 import { ValidateFunction } from "ajv";
 import { MulterFile } from '../@types';
 import ImageUploadService from '../services/ImageUpload.service';
+import logger from './LoggerUtil';
 
 export const generateRandomName = (): string => {
   const randomName = Math.random()
@@ -55,3 +56,20 @@ export const uploadFilesToGoogle = (files: MulterFile[]) => {
     });
   })
 };
+
+export const deleteGoogleFiles = (links: string[]) => {
+  if (!links) {
+    return;
+  }
+  links.forEach((link: string) => {
+    const blob = ImageUploadService.getBucket();
+    const file = link.split('/').pop();
+    if (file) {
+      try {
+        blob.file(file).delete();
+      } catch(err) {
+        logger.error(`Error deleting file ${file}`, err);
+      }
+    }
+  });
+}
