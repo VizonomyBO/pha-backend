@@ -56,7 +56,7 @@ export interface PhaRetailer {
   submission_date?: Date,
   submission_status?: string,
   imagelinks: string,
-  update_date: string,
+  update_date?: string,
 }
 
 export interface PhaIndividual {
@@ -74,5 +74,5 @@ export interface PhaIndividual {
   contact_zipcode?: string,
   submission_date?: Date,
   submission_status?: string,
-  update_date: string,
+  update_date?: string,
 }
