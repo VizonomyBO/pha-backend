@@ -49,6 +49,9 @@ const schema: JTDSchemaType<PhaIndividual> = {
     submission_status: {
       type: "string",
     },
+    update_date: {
+      type: "string"
+    }
   }
 };
 

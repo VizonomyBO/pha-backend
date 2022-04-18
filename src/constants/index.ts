@@ -27,3 +27,8 @@ export const DATA_SOURCES = {
   'retailers_osm': RETAILERS_OSM,
   'retailers_usda': RETAILERS_USDA
 };
+
+export const IMAGELINKS = 'imagelinks';
+export const OWNER_PHOTO = 'owner_photo';
+export const RETAILER = 'retailer';
+export const INDIVIDUAL = 'individual';

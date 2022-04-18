@@ -176,6 +176,9 @@ const schema: JTDSchemaType<PhaRetailer> = {
     owner_name: {
       type: "string",
     },
+    update_date: {
+      type: "string"
+    }
   }
 };
 

@@ -10,7 +10,11 @@ import {
   CONNECTION_NAME,
   CARTO_AUTH_URL,
   CARTO_API,
-  CARTO_API_VERSION
+  CARTO_API_VERSION,
+  PHA_RETAILER_TABLE,
+  PHA_INDIVIDUAL,
+  RETAILER,
+  INDIVIDUAL
 } from '../constants'
 import logger from '../utils/LoggerUtil';
 import { 
@@ -30,6 +34,7 @@ import {
   updatePHAIndividualQuery,
   updatePHARetailerQuery
 } from '../utils/queryGenerator';
+import { deleteGoogleFiles } from '../utils';
 
 export const getOAuthToken = async (): Promise<string> => {
   logger.info("executing function: getOAuthToken");
@@ -112,6 +117,29 @@ const getRequestToCarto = async (query: string) => {
       throw new NotFoundError('Table not found');
     }
     throw error;
+  }
+};
+
+export const deleteJob = async (id: string, table: string, links: string, field: string) => {
+  logger.info("executing function: deleteJob");
+  try {
+    const obj = {
+      [RETAILER]: {
+        table: PHA_RETAILER_TABLE,
+        id: 'retailer_id'
+      },
+      [INDIVIDUAL]: {
+        table: PHA_INDIVIDUAL,
+        id: 'individual_id'
+      }
+    };
+    const getFieldQuery = `SELECT ${field} FROM ${obj[table].table} WHERE ${obj[table].id} = '${id}'`;
+    const response = await getRequestToCarto(getFieldQuery);
+    const array = response.rows[0][field];
+    const toDelete = array.filter(link => !links.includes(link));
+    deleteGoogleFiles(toDelete);
+  } catch(error) {
+    logger.error(error);
   }
 };
 
