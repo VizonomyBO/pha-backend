@@ -64,24 +64,47 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
-      finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
-      finalFields.replace('imagelinks', 'NULL as imagelinks');
-      finalFields.replace('address_1', 'address as address_1');
-      finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
-      finalFields.replace('wic_accepted', 'wic_cash as wic_accepted');
-      finalFields.replace('snap_accepted', 'snap as snap_accepted');
+      finalFields = finalFields.replace('state', 'NULL as state');
+      finalFields = finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
+      finalFields = finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields = finalFields.replace('address_1', 'address as address_1');
+      finalFields = finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
+      finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
+      finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+      // finalFields = "*";
+      /*
+        {
+        "geom": {
+          "type": "Point",
+          "coordinates": [
+            -90.0618115,
+            34.9619158
+          ]
+        },
+        "feature_type": "points",
+        "master_id": 8663463359,
+        "osm_id": 8663463359,
+        "osm_way_id": null,
+        "osm_timestamp": "2021-05-11T11:13:42.000Z",
+        "city": "Horn Lake",
+        "address": null,
+        "address": 38637,
+        "brand": "Aldi",
+        "name": "Aldi",
+        "source": "retailers_osm"
+      */
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
-      finalFields.replace('retailer_id', 'CAST(listing_id as STRING) as retailer_id');
-      finalFields.replace('imagelinks', 'NULL as imagelinks');
-      finalFields.replace('name', 'listing_name as name');
-      finalFields.replace('address_1', 'location_address as address_1');
-      finalFields.replace('zipcode', 'NULL as zipcode');
-      finalFields.replace('city', 'NULL as city');
-      finalFields.replace('state', 'NULL as state');
-      finalFields.replace('wic_accepted', 'NULL as wic_accepted');
-      finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+      finalFields = finalFields.replace('retailer_id', 'CAST(listing_id as STRING) as retailer_id');
+      finalFields = finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields = finalFields.replace('name', 'listing_name as name');
+      finalFields = finalFields.replace('address_1', 'location_address as address_1');
+      finalFields = finalFields.replace('zipcode', 'NULL as zipcode');
+      finalFields = finalFields.replace('city', 'NULL as city');
+      finalFields = finalFields.replace('state', 'NULL as state');
+      finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
+      finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
     }
     queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
   });
