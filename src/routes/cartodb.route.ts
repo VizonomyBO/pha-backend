@@ -209,12 +209,13 @@ router.put('/pha-individual/:id', async (req: RequestWithFiles, res: Response, n
         return;
       }
     }
+    const individualId: string = req.params.id;
     const imageLinksPromises = uploadFilesToGoogle(req.files);
     const imagelinks = await Promise.all(imageLinksPromises);
     const body = JSON.parse(req.body.json);
     const currentImageLinks = (body.imagelinks || '').split(',');
     body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
-    deleteJob(body.individual_id, INDIVIDUAL, currentImageLinks, IMAGELINKS);
+    deleteJob(individualId, INDIVIDUAL, currentImageLinks, IMAGELINKS);
     body.update_date = new Date();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;
@@ -311,6 +312,7 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
         return;
       }
     }
+    const retailerId = req.params.id;
     const imageLinksPromises = uploadFilesToGoogle(req.files[ImageUploadService.images]);
     const ownerPhotosPromises = uploadFilesToGoogle(req.files[ImageUploadService.ownerimages]);
     const [imagelinks, ownerimages] = [await Promise.all(imageLinksPromises), await Promise.all(ownerPhotosPromises)];
@@ -319,8 +321,8 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
     const currentOwnerImages = (body.owner_photo || '').split(',');
     body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
     body.owner_photo = currentOwnerImages.concat(ownerimages).join(',');
-    deleteJob(body.retailer_id, RETAILER, currentImageLinks, IMAGELINKS);
-    deleteJob(body.retailer_id, RETAILER, currentOwnerImages, OWNER_PHOTO);
+    deleteJob(retailerId, RETAILER, currentImageLinks, IMAGELINKS);
+    deleteJob(retailerId, RETAILER, currentOwnerImages, OWNER_PHOTO);
     body.update_date = new Date();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;

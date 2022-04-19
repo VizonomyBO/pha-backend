@@ -58,6 +58,7 @@ export const uploadFilesToGoogle = (files: MulterFile[]) => {
 };
 
 export const deleteGoogleFiles = (links: string[]) => {
+  logger.info('Excuting deleteGoogleFiles with links: ', links);
   if (!links) {
     return;
   }
@@ -66,6 +67,7 @@ export const deleteGoogleFiles = (links: string[]) => {
     const file = link.split('/').pop();
     if (file) {
       try {
+        logger.info(`Deleting file ${file}`);
         blob.file(file).delete();
       } catch(err) {
         logger.error(`Error deleting file ${file}`, err);
