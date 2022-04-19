@@ -20,6 +20,7 @@ import logger from '../utils/LoggerUtil';
 import { 
   buildFilterQueries,
   getBadgeQuery,
+  getDeleteOsmPointQuery,
   getIndividualQuery,
   getMapQuery,
   getPHAIndividualCSVQuery,
@@ -323,6 +324,18 @@ export const getPHAIndividualCSV = async (individualIds: string[]) => {
     const csv = json2csv.parse(response.rows);
     return csv;
   } catch (error) {
+    throw error;
+  }
+}
+
+export const deleteOsmPoint = async (osmId: string) => {
+  logger.info("executing funcion: delete Osm Point");
+  const query = getDeleteOsmPointQuery(osmId);
+  try {
+    const response = await getRequestToCarto(query);
+    return response.rows[0];
+  } catch(error) {
+    console.error(error);
     throw error;
   }
 }
