@@ -1,14 +1,16 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_PHA } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
   return `POLYGON((${minLng} ${minLat}, ${minLng} ${maxLat}, ${maxLng} ${maxLat}, ${maxLng} ${minLat}, ${minLng} ${minLat}))`;
 };
-export const whereFilterQueries = (filters: FiltersInterface) => {
+export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
   const where: string[][] = [];
-  where.push(["submission_status = 'Approved'"]);
+  if (who === RETAILERS_PHA) {
+    where.push(["submission_status = 'Approved'"]);
+  }
   if (filters.categories) {
     const row: string[] = [];
     filters.categories.forEach(category => {
@@ -42,7 +44,7 @@ export const whereFilterQueries = (filters: FiltersInterface) => {
 export const  buildFilterQueries = (filters: FiltersInterface) => {
   const queries = {};
   filters.dataSources.forEach(dataSource => {
-    const suffix = whereFilterQueries(filters);
+    const suffix = whereFilterQueries(filters, dataSource);
     queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
   });
   return queries;

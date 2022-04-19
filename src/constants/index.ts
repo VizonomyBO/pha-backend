@@ -22,6 +22,7 @@ export const ERROR_CODE_UNAUTHORIZED = 401;
 export const ERROR_CODE_BAD_REQUEST = 400;
 export const ERROR_CODE_NOT_FOUND = 404;
 
+export const RETAILERS_PHA = 'retailers_pha';
 export const DATA_SOURCES = {
   'retailers_pha': PHA_RETAILER_TABLE,
   'retailers_osm': RETAILERS_OSM,
