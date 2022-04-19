@@ -8,6 +8,7 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
 };
 export const whereFilterQueries = (filters: FiltersInterface) => {
   const where: string[][] = [];
+  where.push(["submission_status = 'Approved'"]);
   if (filters.categories) {
     const row: string[] = [];
     filters.categories.forEach(category => {
