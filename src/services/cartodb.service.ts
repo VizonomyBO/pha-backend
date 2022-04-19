@@ -135,7 +135,7 @@ export const deleteJob = async (id: string, table: string, links: string, field:
     };
     const getFieldQuery = `SELECT ${field} FROM ${obj[table].table} WHERE ${obj[table].id} = '${id}'`;
     const response = await getRequestToCarto(getFieldQuery);
-    const array = response.rows[0][field];
+    const array = (response.rows[0][field] || '').split(',');
     const toDelete = array.filter(link => !links.includes(link));
     deleteGoogleFiles(toDelete);
   } catch(error) {
