@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_PHA } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA_SOURCE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -58,7 +58,32 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const offset = (page - 1) * limit;
   const limitQuery = ` ORDER BY name LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
-    queries.push(`SELECT ${fields.join(',')}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+    let finalFields = '';
+    if (source === RETAILERS_PHA) {
+      finalFields = fields.join(', ');
+    }
+    if (source === RETAILERS_OSM_SOURCE) {
+      finalFields = fields.join(', ');
+      finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
+      finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields.replace('address_1', 'address as address_1');
+      finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
+      finalFields.replace('wic_accepted', 'wic_cash as wic_accepted');
+      finalFields.replace('snap_accepted', 'snap as snap_accepted');
+    }
+    if (source === RETAILERS_USDA_SOURCE) {
+      finalFields = fields.join(', ');
+      finalFields.replace('retailer_id', 'CAST(listing_id as STRING) as retailer_id');
+      finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields.replace('name', 'listing_name as name');
+      finalFields.replace('address_1', 'location_address as address_1');
+      finalFields.replace('zipcode', 'NULL as zipcode');
+      finalFields.replace('city', 'NULL as city');
+      finalFields.replace('state', 'NULL as state');
+      finalFields.replace('wic_accepted', 'NULL as wic_accepted');
+      finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+    }
+    queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
   });
   const unionQuery = queries.join(' UNION ALL ') + ` ${where} ${limitQuery} `;
   return unionQuery;
