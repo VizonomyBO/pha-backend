@@ -51,41 +51,44 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 };
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
-  const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
-  const where = whereFilterQueries(filters);
+  const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date'];
+  const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
   const offset = (page - 1) * limit;
-  const limitQuery = ` ORDER BY name LIMIT ${limit + 1} OFFSET ${offset}`;
+  const limitQuery = ` ORDER BY submission_date DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
-      finalFields = fields.join(', ');
+      console.log('fields fields ');
+      finalFields = fields.join(`,`);
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
-      finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
-      finalFields.replace('imagelinks', 'NULL as imagelinks');
-      finalFields.replace('address_1', 'address as address_1');
-      finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
-      finalFields.replace('wic_accepted', 'wic_cash as wic_accepted');
-      finalFields.replace('snap_accepted', 'snap as snap_accepted');
+      finalFields = finalFields.replace('state', 'NULL as state');
+      finalFields = finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
+      finalFields = finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields = finalFields.replace('address_1', 'address as address_1');
+      finalFields = finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
+      finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
+      finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
-      finalFields.replace('retailer_id', 'CAST(listing_id as STRING) as retailer_id');
-      finalFields.replace('imagelinks', 'NULL as imagelinks');
-      finalFields.replace('name', 'listing_name as name');
-      finalFields.replace('address_1', 'location_address as address_1');
-      finalFields.replace('zipcode', 'NULL as zipcode');
-      finalFields.replace('city', 'NULL as city');
-      finalFields.replace('state', 'NULL as state');
-      finalFields.replace('wic_accepted', 'NULL as wic_accepted');
-      finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+      finalFields = finalFields.replace('retailer_id', 'CAST(listing_id as STRING) as retailer_id');
+      finalFields = finalFields.replace('imagelinks', 'NULL as imagelinks');
+      finalFields = finalFields.replace('name', 'listing_name as name');
+      finalFields = finalFields.replace('address_1', 'location_address as address_1');
+      finalFields = finalFields.replace('zipcode', 'NULL as zipcode');
+      finalFields = finalFields.replace('city', 'NULL as city');
+      finalFields = finalFields.replace('state', 'NULL as state');
+      finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
+      finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
     }
     queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
   });
-  const unionQuery = queries.join(' UNION ALL ') + ` ${where} ${limitQuery} `;
+  const unionQuery = `${queries.join(' UNION ALL ')} ${where} ${limitQuery} `;
   return unionQuery;
 }
 
@@ -150,7 +153,7 @@ export const getUnionQuery = (queryParams: QueryParams) => {
       SELECT ${fieldsToReturn}, zipcode FROM (${individualQuery})
     UNION ALL SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
     ${where}
-    ORDER BY name ${suffix}`;
+    ORDER BY submission_date DESC ${suffix}`;
   return unionQuery;
 }
 
