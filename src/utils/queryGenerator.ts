@@ -118,9 +118,10 @@ export const getIndividualQuery = (queryParams?: QueryParams) => {
   FROM ${PHA_INDIVIDUAL} pi 
   JOIN ${PHA_RETAILER_TABLE} pr ON pi.retailer_id = pr.retailer_id`;
   if (queryParams) {
-    const {where, suffix} = generateWhereArray(queryParams);
+    const { suffix, where } = generateWhereArray(queryParams);
     if (where.length) {
       query += ` WHERE ${where.join(' AND ')}`;
+      query = query.replace("submission_status != 'Deleted'", "pr.submission_status != 'Deleted' AND pi.submission_status != 'Deleted'");
     }
     query += suffix;
   }
@@ -139,7 +140,7 @@ export const getRetailerQuery = (queryParams?: QueryParams) => {
   return query;
 };
 
-export const getUnionQuery = (queryParams: QueryParams) => {
+export const getDashboardQuery = (queryParams: QueryParams) => {
   const individualQuery = getIndividualQuery();
   const retailerQuery = getRetailerQuery();
   const fieldsToReturn = `retailer_id, name, submission_date, submission_status, address_1, contact_name,
@@ -149,16 +150,19 @@ export const getUnionQuery = (queryParams: QueryParams) => {
   if (whereArray.length) {
     where = `WHERE ${whereArray.join(' AND ')}`;
   }
-  const unionQuery = `
-      SELECT ${fieldsToReturn}, zipcode FROM (${individualQuery})
-    UNION ALL SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
-    ${where}
-    ORDER BY submission_date DESC ${suffix}`;
-  return unionQuery;
+  let query = `SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
+    ${where} ORDER BY submission_date DESC ${suffix}`;
+  console.log(queryParams);
+  if (!queryParams.isRetailer) {
+    console.log('faqiu');
+    return `SELECT ${fieldsToReturn}, zipcode, individual_id FROM (${individualQuery}) ${where}
+      ORDER BY submission_date DESC ${suffix}`;
+  }
+  return query;
 }
 
-export const getRowsOnUnion = (queryParams: QueryParams) => {
-  const query = getUnionQuery(queryParams).replace(/OFFSET \d+/g, '').replace(/LIMIT \d+/g, '');
+export const getRowsOnDashboard = (queryParams: QueryParams) => {
+  const query = getDashboardQuery(queryParams).replace(/OFFSET \d+/g, '').replace(/LIMIT \d+/g, '');
   const countQuery = `SELECT COUNT(*) as count FROM (${query}) AS count`;
   return countQuery;
 }

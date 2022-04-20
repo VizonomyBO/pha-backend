@@ -101,14 +101,15 @@ router.get('/pha-retailer', async (req: Request, res: Response, next: NextFuncti
 });
 
 router.get('/dashboard', async (req: Request, res: Response, next: NextFunction) => {
-  const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '', isRetailer = 'false' } = req.query;
   try {
     const queryParams: QueryParams = {
       page: +page,
       limit: +limit,
       status: status as string,
       search: search as string,
-      dateRange: dateRange as string
+      dateRange: dateRange as string,
+      isRetailer: isRetailer === 'true'
     };
     const response = await getDashboard(queryParams);
     res.send({ data: response, success: true });
@@ -118,14 +119,15 @@ router.get('/dashboard', async (req: Request, res: Response, next: NextFunction)
 });
 
 router.get('/dashboard-count', async (req: Request, res: Response, next: NextFunction) => {
-  const { page = 1, limit = 10, status = '', search = '', dateRange = '' } = req.query;
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '', isRetailer = 'false' } = req.query;
   try {
     const queryParams: QueryParams = {
       page: +page,
       limit: +limit,
       status: status as string,
       search: search as string,
-      dateRange: dateRange as string
+      dateRange: dateRange as string,
+      isRetailer: isRetailer === 'true'
     };
     const response = await getDashboardCount(queryParams);
     res.send({ data: response, success: true });
