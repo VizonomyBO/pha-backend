@@ -52,11 +52,11 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
   const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
-  const where = whereFilterQueries(filters);
+  const where = whereFilterQueries(filters, RETAILERS_PHA);//TODO: Addis, should update this filter as needed
   const queries: string[] = [];
   const { page, limit } = queryParams;
   const offset = (page - 1) * limit;
-  const limitQuery = ` ORDER BY name LIMIT ${limit + 1} OFFSET ${offset}`;
+  const limitQuery = ` ORDER BY submission_date DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
@@ -173,7 +173,7 @@ export const getUnionQuery = (queryParams: QueryParams) => {
       SELECT ${fieldsToReturn}, zipcode FROM (${individualQuery})
     UNION ALL SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
     ${where}
-    ORDER BY name ${suffix}`;
+    ORDER BY submission_date DESC ${suffix}`;
   return unionQuery;
 }
 
