@@ -51,8 +51,9 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 };
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
-  const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city', 'state', 'zipcode', 'wic_accepted', 'snap_accepted'];
-  const where = whereFilterQueries(filters, RETAILERS_PHA);//TODO: Addis, should update this filter as needed
+  const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status'];
+  const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
   const offset = (page - 1) * limit;
@@ -60,7 +61,8 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
-      finalFields = fields.join(', ');
+      console.log('fields fields ');
+      finalFields = fields.join(`, ${RETAILERS_PHA} as source`);
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
@@ -71,28 +73,6 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
       finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
-      // finalFields = "*";
-      /*
-        {
-        "geom": {
-          "type": "Point",
-          "coordinates": [
-            -90.0618115,
-            34.9619158
-          ]
-        },
-        "feature_type": "points",
-        "master_id": 8663463359,
-        "osm_id": 8663463359,
-        "osm_way_id": null,
-        "osm_timestamp": "2021-05-11T11:13:42.000Z",
-        "city": "Horn Lake",
-        "address": null,
-        "address": 38637,
-        "brand": "Aldi",
-        "name": "Aldi",
-        "source": "retailers_osm"
-      */
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
@@ -108,7 +88,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     }
     queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
   });
-  const unionQuery = queries.join(' UNION ALL ') + ` ${where} ${limitQuery} `;
+  const unionQuery = `${queries.join(' UNION ALL ')} ${where} ${limitQuery} `;
   return unionQuery;
 }
 
