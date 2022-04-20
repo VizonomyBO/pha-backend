@@ -52,7 +52,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
   const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
-    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status'];
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
@@ -62,7 +62,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     let finalFields = '';
     if (source === RETAILERS_PHA) {
       console.log('fields fields ');
-      finalFields = fields.join(`, ${RETAILERS_PHA} as source`);
+      finalFields = fields.join(`,`);
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
