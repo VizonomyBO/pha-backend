@@ -52,7 +52,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
   const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
-    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date'];
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
@@ -61,8 +61,8 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
-      console.log('fields fields ');
       finalFields = fields.join(`,`);
+      finalFields = finalFields.replace('snap_option', 'NULL as snap_option');
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
@@ -73,6 +73,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('zipcode', 'CAST(postcode as STRING) as zipcode');
       finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+      finalFields = finalFields.replace('snap_option', 'NULL as snap_option');
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
@@ -86,9 +87,18 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
     }
-    queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+    if (source === RETAILERS_PHA) {
+      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where})`);
+    } else {
+      if (filters.bbox) {
+        const bboxWhere = `WHERE ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`;
+        queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${bboxWhere})`);
+      } else {
+        queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+      }
+    }
   });
-  const unionQuery = `${queries.join(' UNION ALL ')} ${where} ${limitQuery} `;
+  const unionQuery = `(${queries.join(' UNION ALL ')}) ${limitQuery} `;
   return unionQuery;
 }
 
