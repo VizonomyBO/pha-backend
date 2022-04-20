@@ -27,8 +27,8 @@ import {
   getPHARetailerCSVQuery,
   getProfileQuery,
   getRetailerQuery,
-  getRowsOnUnion,
-  getUnionQuery,
+  getRowsOnDashboard,
+  getDashboardQuery,
   insertPHAIndividualQuery,
   insertPHARetailerQuery,
   updatePHAIndividualQuery,
@@ -99,6 +99,7 @@ const getRequestToCarto = async (query: string) => {
   logger.debug(`with params: ${params}`);
   try {
     const token = await getOAuthToken();
+    logger.info(`Starting query to Carto: ${query}`);
     const response = await axios.post(
       `${CARTO_API}/${CARTO_API_VERSION}/sql/${CONNECTION_NAME}/query`,
       {
@@ -232,7 +233,7 @@ export const getDashboard = async (queryParams: QueryParams) => {
   const params = JSON.stringify(queryParams);
   logger.debug(`with params: ${params}`);
   try {
-    const unionQuery = getUnionQuery(queryParams);
+    const unionQuery = getDashboardQuery(queryParams);
     logger.debug(`with query: ${unionQuery}`);
     const response = await getRequestToCarto(unionQuery);
     return response;
@@ -246,7 +247,7 @@ export const getDashboardCount = async (queryParams: QueryParams) => {
   const params = JSON.stringify(queryParams);
   logger.debug(`with params: ${params}`);
   try {
-    const countQuery = getRowsOnUnion(queryParams);
+    const countQuery = getRowsOnDashboard(queryParams);
     logger.debug(`with query: ${countQuery}`);
     const response = await getRequestToCarto(countQuery);
     return { count: response.rows[0].count };
