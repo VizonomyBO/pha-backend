@@ -99,7 +99,6 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     }
   });
   const unionQuery = `(${queries.join(' UNION ALL ')}) ${limitQuery} `;
-  console.log('unionQuery', unionQuery);
   return unionQuery;
 }
 
