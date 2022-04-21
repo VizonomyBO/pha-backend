@@ -21,7 +21,8 @@ import {
   getPHAIndividualCSV,
   deleteJob,
   createPhaRetailerTable,
-  createIndividualTable
+  createIndividualTable,
+  deleteOsmPoint
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -362,4 +363,15 @@ router.post('/map-table', [filtersMiddleware], async (req: Request, res: Respons
   }
 });
 
+router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+  console.log('it reaches here', id);
+  try {
+    const response = await deleteOsmPoint(id);
+    res.send({ success: true, data: response });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 export default router;

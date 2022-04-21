@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA_SOURCE } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA_SOURCE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -57,7 +57,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const queries: string[] = [];
   const { page, limit } = queryParams;
   const offset = (page - 1) * limit;
-  const limitQuery = ` ORDER BY submission_date DESC LIMIT ${limit + 1} OFFSET ${offset}`;
+  const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
@@ -436,5 +436,12 @@ export const getPHAIndividualCSVQuery = (individualIds: string[]): string => {
     FROM ${PHA_INDIVIDUAL} pi
     JOIN ${PHA_RETAILER_TABLE} pr ON pi.retailer_id = pr.retailer_id
     ${individualIds.length ? `WHERE pi.individual_id IN (${individualIds.map((a) => `'${a}'`).join(', ')});` : ';'}`;
+  return query;
+}
+
+export const getDeleteOsmPointQuery = (id: string) => {
+  const query = `
+    DELETE FROM ${RETAILERS_OSM} where master_id = ${id}
+  `;
   return query;
 }
