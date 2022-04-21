@@ -199,7 +199,8 @@ export const generateWhereArray = (queryParams: QueryParams) => {
 }
 
 export const getPHAIndividualQuery = (individualId: string) => {
-  const query = `SELECT * FROM ${PHA_INDIVIDUAL} WHERE individual_id = '${individualId}'`;
+  let query = getIndividualQuery();
+  query += ` WHERE individual_id = '${individualId}'`;
   return query;
 }
 
