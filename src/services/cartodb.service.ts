@@ -36,6 +36,109 @@ import {
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 
+export const createIndividualTable = async () => {
+  logger.info("executing function: createIndividual");
+  const query = `
+    CREATE TABLE IF NOT EXISTS ${PHA_INDIVIDUAL} (
+      individual_id STRING,
+      retailer_id STRING,
+      availability STRING,
+      quality STRING,
+      visibility STRING,
+      local STRING,
+      meets_need STRING,
+      produce_avail_store STRING,
+      contact_name STRING,
+      contact_email STRING,
+      contact_phone STRING,
+      contact_zipcode STRING,
+      submission_date TIMESTAMP,
+      submission_status STRING,
+      update_date TIMESTAMP
+    )
+  `;
+  try {
+    const lol =  await getRequestToCarto(query);
+    logger.info(`Successfully changed data types: ${lol}`);
+    return lol;
+  } catch(error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const createPhaRetailerTable = async () => {
+  logger.info("executing function: createPhaRetailerTable");
+  const query = `
+    CREATE TABLE carto-dw-ac-j9wxt0nz.shared.pha_retailer (
+      retailer_id string,
+      geom geography,
+      name string,
+      address_1 string,
+      address_2 string,
+      phone string,
+      city string,
+      state string,
+      zipcode string,
+      sun_open string,
+      sun_close string,
+      mon_open string,
+      mon_close string,
+      tues_open string,
+      tues_close string,
+      wed_open string,
+      wed_close string,
+      thurs_open string,
+      thurs_close string,
+      fri_open string,
+      fri_close string,
+      sat_open string,
+      sat_close string,
+      website string,
+      facebook string,
+      instagram string,
+      twitter string,
+      email string,
+      corner_store string,
+      distribution string,
+      farmers_market string,
+      food_pantry string,
+      food_co_op string,
+      supermarket string,
+      dollar_stores string,
+      wic_accepted string,
+      snap_accepted string,
+      description string,
+      availability string,
+      quality string,
+      visibility string,
+      local string,
+      produce_avail_store string,
+      produce_avail_seasonally string,
+      owner_photo string,
+      owner_name string,
+      contact_name string,
+      contact_email string,
+      contact_owner string,
+      contact_patron string,
+      general_store string,
+      grocery_store string,
+      submission_date timestamp,
+      submission_status string,
+      imagelinks string,
+      update_date timestamp
+    )
+    `;
+  try {
+    const lol =  await getRequestToCarto(query);
+    logger.info(`Successfully changed data types: ${lol}`);
+    return lol;
+  } catch(error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const getOAuthToken = async (): Promise<string> => {
   logger.info("executing function: getOAuthToken");
   try {
@@ -190,7 +293,7 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   logger.info("executing function: insertIntoPHAIndividual");
   const params = JSON.stringify(individual);
   logger.debug(`with params: ${params}`);
-  individual.submission_date = new Date();
+  individual.submission_date = +new Date();
   individual.submission_status = 'Pending';
   individual.individual_id = uuidv4();
   const query = insertPHAIndividualQuery(individual);
@@ -260,7 +363,7 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   logger.info("executing function: insertIntoPHARetailer");
   const params = JSON.stringify(retailer);
   logger.debug(`with params: ${params}`);
-  retailer.submission_date = new Date();
+  retailer.submission_date = +new Date();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
   const query = insertPHARetailerQuery(retailer);

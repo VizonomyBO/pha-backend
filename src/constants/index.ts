@@ -8,7 +8,7 @@ export const REQUIRED_VARIABLES = {
 
 export const DOMAIN = '@localhost.com'
 export const CONNECTION_NAME = 'carto_dw';
-export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_2';
+export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer';
 export const RETAILERS_OSM = 'carto-dw-ac-j9wxt0nz.shared.2022_OpenStreetMap_Mississippi';
 export const RETAILERS_USDA = 'carto-dw-ac-j9wxt0nz.shared.2022_USDA_Farmers_Market';
 export const PHA_INDIVIDUAL = 'carto-dw-ac-j9wxt0nz.shared.pha_individual';

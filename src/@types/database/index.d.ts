@@ -53,10 +53,10 @@ export interface PhaRetailer {
   contact_patron: string,
   general_store: string,
   grocery_store: string,
-  submission_date?: Date,
+  submission_date?: Date | number | string,
   submission_status?: string,
   imagelinks: string,
-  update_date?: string,
+  update_date?: string | number,
 }
 
 export interface PhaIndividual {
@@ -72,7 +72,7 @@ export interface PhaIndividual {
   contact_email?: string,
   contact_phone?: string,
   contact_zipcode?: string,
-  submission_date?: Date,
+  submission_date?: Date | number | string,
   submission_status?: string,
-  update_date?: string,
+  update_date?: string | number,
 }
