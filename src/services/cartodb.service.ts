@@ -49,6 +49,7 @@ export const createIndividualTable = async () => {
       local STRING,
       meets_need STRING,
       produce_avail_store STRING,
+      imagelinks STRING,
       contact_name STRING,
       contact_email STRING,
       contact_phone STRING,
@@ -218,6 +219,7 @@ const getRequestToCarto = async (query: string) => {
     );
     return response.data;
   } catch(error) {
+    console.error(error);
     if (error.response?.status == 404) {
       throw new NotFoundError('Table not found');
     }
@@ -294,7 +296,7 @@ export const insertIntoPHAIndividual = async (individual: PhaIndividual) => {
   logger.info("executing function: insertIntoPHAIndividual");
   const params = JSON.stringify(individual);
   logger.debug(`with params: ${params}`);
-  individual.submission_date = +new Date();
+  individual.submission_date = (new Date()).toISOString();
   individual.submission_status = 'Pending';
   individual.individual_id = uuidv4();
   const query = insertPHAIndividualQuery(individual);
@@ -364,7 +366,7 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
   logger.info("executing function: insertIntoPHARetailer");
   const params = JSON.stringify(retailer);
   logger.debug(`with params: ${params}`);
-  retailer.submission_date = +new Date();
+  retailer.submission_date = (new Date()).toISOString();
   retailer.submission_status = 'Pending';
   retailer.retailer_id = uuidv4();
   const query = insertPHARetailerQuery(retailer);
@@ -372,6 +374,7 @@ export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
     const response = getRequestToCarto(query);
     return response;
   } catch (error) {
+    console.error(error);
     throw error;
   }
 }
