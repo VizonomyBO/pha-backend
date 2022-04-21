@@ -19,7 +19,9 @@ import {
   getPHAIndividual,
   getPHARetailerCSV,
   getPHAIndividualCSV,
-  deleteJob
+  deleteJob,
+  createPhaRetailerTable,
+  createIndividualTable
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -218,7 +220,7 @@ router.put('/pha-individual/:id', async (req: RequestWithFiles, res: Response, n
     const currentImageLinks = (body.imagelinks || '').split(',');
     body.imagelinks = currentImageLinks.concat(imagelinks).join(',');
     deleteJob(individualId, INDIVIDUAL, currentImageLinks, IMAGELINKS);
-    body.update_date = new Date();
+    body.update_date = new Date().toISOString();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;
     next();
@@ -325,7 +327,7 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
     body.owner_photo = currentOwnerImages.concat(ownerimages).join(',');
     deleteJob(retailerId, RETAILER, currentImageLinks, IMAGELINKS);
     deleteJob(retailerId, RETAILER, currentOwnerImages, OWNER_PHOTO);
-    body.update_date = new Date();
+    body.update_date = new Date().toISOString();
     logger.info("BODY ", JSON.stringify(body))
     req.body = body;
     console.log(body.imagelinks, body.owner_photo);

@@ -208,16 +208,20 @@ export const insertPHAIndividualQuery = (individual: PhaIndividual) => {
   const fields: string[] = [];
   const fieldValues: string[] = [];
   Object.keys(individual).forEach((key: string) => {
-    fields.push(key);
-    fieldValues.push(individual[key]);
+    if (key !== 'submission_date') {
+      fields.push(key);
+      fieldValues.push(individual[key]);
+    }
   });
   const query = `
   INSERT INTO ${PHA_INDIVIDUAL}
     (
+      submission_date,
       ${`${fields.join(', ')}`}
     )
     VALUES 
     (
+      TIMESTAMP('${individual.submission_date}'),
       ${`'${fieldValues.join('\', \'')}'`}
     )`;
   return query;
@@ -227,7 +231,7 @@ export const insertPHARetailerQuery = (retailer: PhaRetailer) => {
   const fields: string[] = [];
   const fieldValues: string[] = [];
   Object.keys(retailer).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
+    if (key !== 'longitude' && key !== 'latitude' && key != 'submission_date') {
       fields.push(key);
       fieldValues.push(retailer[key]);
     }
@@ -235,11 +239,13 @@ export const insertPHARetailerQuery = (retailer: PhaRetailer) => {
   const query = `
   INSERT INTO ${PHA_RETAILER_TABLE}
     (
+      submission_date,
       geom,
       ${`${fields.join(', ')}`}
     )
     VALUES 
     (
+      TIMESTAMP('${retailer.submission_date}'),
       ST_GEOGPOINT(${retailer.longitude}, ${retailer.latitude}),
       ${`'${fieldValues.join('\', \'')}'`}
     )`;
@@ -249,7 +255,7 @@ export const insertPHARetailerQuery = (retailer: PhaRetailer) => {
 export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string) => {
   const fields: Propierties[] = [];
   Object.keys(retailer).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
+    if (key !== 'longitude' && key !== 'latitude' && key != 'submission_date' && key !== 'update_date') {
       fields.push({
         key: key,
         value: retailer[key]
@@ -259,6 +265,7 @@ export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string
   const query = `
   UPDATE ${PHA_RETAILER_TABLE}
   SET
+    update_date = TIMESTAMP('${retailer.update_date}'),
     ${`${fields.map((elem) => {
       return `${elem.key} =  '${elem.value}'`;
     }).join(', ')}`}
@@ -269,7 +276,7 @@ export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string
 export const updatePHAIndividualQuery = (individual: PhaIndividual, individualId: string) => {
   const fields: Propierties[] = [];
   Object.keys(individual).forEach((key: string) => {
-    if (key !== 'longitude' && key !== 'latitude') {
+    if (key !== 'longitude' && key !== 'latitude' && key != 'submission_date' && key !== 'update_date') {
       fields.push({
         key: key,
         value: individual[key]
@@ -279,6 +286,7 @@ export const updatePHAIndividualQuery = (individual: PhaIndividual, individualId
   const query = `
     UPDATE ${PHA_INDIVIDUAL}
     SET
+      update_date = TIMESTAMP('${individual.update_date}'),
       ${`${fields.map((elem) => {
         return `${elem.key} =  '${elem.value}'`;
       }).join(', ')}`}
