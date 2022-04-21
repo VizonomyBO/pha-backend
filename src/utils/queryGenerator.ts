@@ -74,6 +74,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
       finalFields = finalFields.replace('snap_option', 'NULL as snap_option');
+      finalFields = finalFields.replace('submission_date','osm_timestamp as submission_date');
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
@@ -86,6 +87,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('state', 'NULL as state');
       finalFields = finalFields.replace('wic_accepted', 'NULL as wic_accepted');
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
+      finalFields = finalFields.replace('submission_date', 'submission_date2 as submission_date');
     }
     if (source === RETAILERS_PHA) {
       queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where})`);
