@@ -57,7 +57,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const queries: string[] = [];
   const { page, limit } = queryParams;
   const offset = (page - 1) * limit;
-  const limitQuery = ` ORDER BY submission_date DESC LIMIT ${limit + 1} OFFSET ${offset}`;
+  const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
     let finalFields = '';
     if (source === RETAILERS_PHA) {
@@ -99,6 +99,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     }
   });
   const unionQuery = `(${queries.join(' UNION ALL ')}) ${limitQuery} `;
+  console.log('unionQuery', unionQuery);
   return unionQuery;
 }
 
