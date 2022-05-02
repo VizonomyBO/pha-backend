@@ -90,13 +90,13 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('submission_date', 'submission_date2 as submission_date');
     }
     if (source === RETAILERS_PHA) {
-      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where})`);
+      queries.push(`(SELECT ${finalFields}, '${source}' as source, count(*) OVER(PARTITION BY 1) as total  FROM ${DATA_SOURCES[source]} ${where})`);
     } else {
       if (filters.bbox) {
         const bboxWhere = `WHERE ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`;
-        queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${bboxWhere})`);
+        queries.push(`(SELECT ${finalFields}, '${source}' as source, count(*) OVER(PARTITION BY 1) as total FROM ${DATA_SOURCES[source]} ${bboxWhere})`);
       } else {
-        queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+        queries.push(`SELECT ${finalFields}, '${source}' as source, count(*) OVER(PARTITION BY 1) as total FROM ${DATA_SOURCES[source]}`);
       }
     }
   });
