@@ -103,7 +103,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const unionQuery = `(${queries.join(' UNION ALL ')})  `;
   const auxQuery = `WITH aux AS (${unionQuery})
     SELECT *, count(*) over() as total FROM aux ${limitQuery}`;
-  return unionQuery;
+  return auxQuery;
 }
 
 export const getBadgeQuery = (id: string) => {
