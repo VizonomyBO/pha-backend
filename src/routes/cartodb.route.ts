@@ -22,7 +22,9 @@ import {
   deleteJob,
   createPhaRetailerTable,
   createIndividualTable,
-  deleteOsmPoint
+  deleteOsmPoint,
+  jobClusterTables,
+  getJob
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -36,6 +38,17 @@ const upload = ImageUploadService.getUploadFields();
 
 router.get('/', async (_: never, res: Response) => {
   res.json({ success: true, message: 'Storage Working' });
+});
+
+router.get('/job', async (_: never, res: Response) => {
+  const jobs = await jobClusterTables();
+  res.json({ success: true, data: jobs });
+});
+
+router.get('/job/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const job = await getJob(id);
+  res.json({ success: true, data: job });
 });
 
 router.post('/layers', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {

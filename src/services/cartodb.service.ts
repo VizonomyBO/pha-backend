@@ -14,7 +14,9 @@ import {
   PHA_RETAILER_TABLE,
   PHA_INDIVIDUAL,
   RETAILER,
-  INDIVIDUAL
+  INDIVIDUAL,
+  RETAILERS_OSM,
+  RETAILERS_USDA
 } from '../constants'
 import logger from '../utils/LoggerUtil';
 import { 
@@ -36,6 +38,85 @@ import {
   updatePHARetailerQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
+
+const getJobStatus = async (job: string) => {
+  logger.info("executing function: getRequestToCarto");
+  const params = JSON.stringify(job);
+  logger.debug(`with params: ${params}`);
+  try {
+    const token = await getOAuthToken();
+    logger.info(`Starting query to Carto: ${job}`);
+    const response = await axios.get(
+      `${CARTO_API}/${CARTO_API_VERSION}/sql/${CONNECTION_NAME}/job/${job}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch(error) {
+    console.error(error);
+    if (error.response?.status == 404) {
+      throw new NotFoundError('Job not found');
+    }
+    throw error;
+  }
+};
+
+const sendJobToCarto = async (query: string) => {
+  logger.info("executing function: getRequestToCarto");
+  const params = JSON.stringify(query);
+  logger.debug(`with params: ${params}`);
+  try {
+    const token = await getOAuthToken();
+    logger.info(`Starting query to Carto: ${query}`);
+    const response = await axios.post(
+      `${CARTO_API}/${CARTO_API_VERSION}/sql/${CONNECTION_NAME}/job`,
+      {
+        query: query,
+        metadata: {}
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch(error) {
+    console.error(error);
+    if (error.response?.status == 404) {
+      throw new NotFoundError('Table not found');
+    }
+    throw error;
+  }
+};
+
+export const getJob = async (job: string) => {
+  logger.info("executing function: getRequestToCarto");
+  const params = JSON.stringify(job);
+  logger.debug(`with params: ${params}`);
+  try {
+    const getJob = await getJobStatus(job);
+    return getJob;
+  } catch(error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const jobClusterTables = async () => {
+  const query = `
+    CREATE OR REPLACE TABLE ${PHA_RETAILER_TABLE}_clustered CLUSTER BY geom AS (SELECT * FROM ${PHA_RETAILER_TABLE});
+    CREATE OR REPLACE TABLE ${RETAILERS_OSM}_clustered CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_OSM});
+    CREATE OR REPLACE TABLE ${RETAILERS_USDA}_clustered CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_USDA});
+  `;
+  const runJob = await sendJobToCarto(query);
+  return runJob;
+};
 
 export const createIndividualTable = async () => {
   logger.info("executing function: createIndividual");

@@ -18,6 +18,14 @@ router.use((request: Request, response: Response, next: NextFunction) => {
   next();
 });
 
+router.get('/_ah/warmup', (req: Request, res: Response) => {
+  res.json({ success: true });
+});
+
+router.get('/_ah/start', (req: Request, res: Response) => {
+  res.json({ success: true });
+});
+
 router.get('/', (request: Request, response: Response) => {
   const info = {
     name: 'API',
