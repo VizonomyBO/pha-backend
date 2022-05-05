@@ -20,11 +20,13 @@ import {
   getPHARetailerCSV,
   getPHAIndividualCSV,
   deleteJob,
-  createPhaRetailerTable,
-  createIndividualTable,
   deleteOsmPoint,
   jobClusterTables,
-  getJob
+  getJob,
+  addIndexOSM,
+  addIndexUSDA,
+  addIndexPHA,
+  createTableUSDAFiltered
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -378,10 +380,39 @@ router.post('/map-table', [filtersMiddleware], async (req: Request, res: Respons
 
 router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.id;
-  console.log('it reaches here', id);
   try {
     const response = await deleteOsmPoint(id);
     res.send({ success: true, data: response });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.put('/index/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+  try {
+      if (id === 'osm') {
+        const response = await addIndexOSM();
+        res.send({ success: true, data: response });
+      } else if ( id === 'usda') {
+        const response = await addIndexUSDA();
+        res.send({ success: true, data: response });
+      } else {
+        const response = await addIndexPHA();
+        res.send({ success: true, data: response });
+      }
+    
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.put('/createtablefilteredusdabymississipi', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const response = await createTableUSDAFiltered();
+    res.send({ success: true, data: response});
   } catch (error) {
     console.log(error);
     next(error);
