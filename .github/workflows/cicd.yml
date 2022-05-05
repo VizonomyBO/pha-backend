@@ -82,5 +82,5 @@ jobs:
           --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
           --platform "managed" \
           --port 9000 \
-          --allow-unauthenticated
+          --allow-unauthenticated \
           --memory 1G
