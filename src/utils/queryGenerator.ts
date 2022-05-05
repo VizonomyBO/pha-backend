@@ -66,6 +66,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     }
     if (source === RETAILERS_OSM_SOURCE) {
       finalFields = fields.join(', ');
+      finalFields = finalFields.replace('geom', 'ST_CENTROID(geom) as geom');
       finalFields = finalFields.replace('state', 'NULL as state');
       finalFields = finalFields.replace('retailer_id', 'CAST(master_id as STRING) as retailer_id');
       finalFields = finalFields.replace('imagelinks', 'NULL as imagelinks');
