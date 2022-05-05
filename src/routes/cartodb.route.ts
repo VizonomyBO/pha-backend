@@ -20,8 +20,6 @@ import {
   getPHARetailerCSV,
   getPHAIndividualCSV,
   deleteJob,
-  createPhaRetailerTable,
-  createIndividualTable,
   deleteOsmPoint,
   jobClusterTables,
   getJob
@@ -378,7 +376,6 @@ router.post('/map-table', [filtersMiddleware], async (req: Request, res: Respons
 
 router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.id;
-  console.log('it reaches here', id);
   try {
     const response = await deleteOsmPoint(id);
     res.send({ success: true, data: response });
@@ -387,4 +384,5 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
     next(error);
   }
 });
+
 export default router;

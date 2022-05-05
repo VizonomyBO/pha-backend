@@ -527,3 +527,4 @@ export const deleteOsmPoint = async (osmId: string) => {
     throw error;
   }
 }
+
