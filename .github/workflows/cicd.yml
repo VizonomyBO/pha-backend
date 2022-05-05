@@ -83,3 +83,4 @@ jobs:
           --platform "managed" \
           --port 9000 \
           --allow-unauthenticated
+          --memory 1G
