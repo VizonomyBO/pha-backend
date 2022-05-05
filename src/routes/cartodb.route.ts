@@ -22,11 +22,7 @@ import {
   deleteJob,
   deleteOsmPoint,
   jobClusterTables,
-  getJob,
-  addIndexOSM,
-  addIndexUSDA,
-  addIndexPHA,
-  createTableUSDAFiltered
+  getJob
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -388,34 +384,3 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
     next(error);
   }
 });
-
-router.put('/index/:id', async (req: Request, res: Response, next: NextFunction) => {
-  const id = req.params.id;
-  try {
-      if (id === 'osm') {
-        const response = await addIndexOSM();
-        res.send({ success: true, data: response });
-      } else if ( id === 'usda') {
-        const response = await addIndexUSDA();
-        res.send({ success: true, data: response });
-      } else {
-        const response = await addIndexPHA();
-        res.send({ success: true, data: response });
-      }
-    
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-
-router.put('/createtablefilteredusdabymississipi', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const response = await createTableUSDAFiltered();
-    res.send({ success: true, data: response});
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-export default router;

@@ -35,9 +35,7 @@ import {
   insertPHAIndividualQuery,
   insertPHARetailerQuery,
   updatePHAIndividualQuery,
-  updatePHARetailerQuery,
-  AddIndexes,
-  createFilteredUsda
+  updatePHARetailerQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 
@@ -530,50 +528,3 @@ export const deleteOsmPoint = async (osmId: string) => {
   }
 }
 
-export const addIndexPHA = async () => {
-  logger.info("executing funcion: add index pha");
-  const query = AddIndexes(PHA_RETAILER_TABLE);
-  try {
-    const response = await getRequestToCarto(query);
-    return response.rows[0];
-  } catch(error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export const addIndexOSM = async () => {
-  logger.info("executing funcion: add index osm");
-  const query = AddIndexes(RETAILERS_OSM);
-  try {
-    const response = await getRequestToCarto(query);
-    return response.rows[0];
-  } catch(error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export const addIndexUSDA = async () => {
-  logger.info("executing funcion: add index osm");
-  const query = AddIndexes(RETAILERS_USDA);
-  try {
-    const response = await getRequestToCarto(query);
-    return response.rows[0];
-  } catch(error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export const createTableUSDAFiltered = async () => {
-  logger.info("executing funcion: create filtered usda");
-  const query = createFilteredUsda();
-  try {
-    const response = await getRequestToCarto(query);
-    return response.rows[0];
-  } catch(error) {
-    console.error(error);
-    throw error;
-  }
-}

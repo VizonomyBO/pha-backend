@@ -103,13 +103,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const unionQuery = `(${queries.join(' UNION ALL ')})  `;
   const auxQuery = `WITH aux AS (${unionQuery})
     SELECT *, count(*) over() as total FROM aux ${limitQuery}`;
-    console.log('AUXQUERY', auxQuery);
   return auxQuery;
-}
-
-export const AddIndexes = (table: string) => {
-  const query = `CREATE SEARCH INDEX index_${table} ON ${table}(ALL COLUMNS)`;
-  return query;
 }
 
 export const getBadgeQuery = (id: string) => {
@@ -454,16 +448,4 @@ export const getDeleteOsmPointQuery = (id: string) => {
     DELETE FROM ${RETAILERS_OSM} where master_id = ${id}
   `;
   return query;
-}
-
-export const createFilteredUsda = () => {
-  const query = `
-  CREATE TABLE 2022_USDA_Farmers_Markets_MS
-  CLUSTER BY geom
-  AS 
-    (
-      SELECT a.* from ${RETAILERS_USDA} a ,${MISSISSIPPI_TABLE} b where ST_intersects(a.geom, b.geom)
-    )
-  `;
-  return query
 }
