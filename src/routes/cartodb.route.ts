@@ -384,3 +384,5 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
     next(error);
   }
 });
+
+export default router;
