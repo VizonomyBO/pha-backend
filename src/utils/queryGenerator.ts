@@ -46,7 +46,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
   filters.dataSources.forEach(dataSource => {
     const suffix = whereFilterQueries(filters, dataSource);
     if (dataSource === RETAILERS_OSM_SOURCE) {
-      queries[dataSource] = `SELECT * REPLACE(ST_CENTROID AS geom) FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
+      queries[dataSource] = `SELECT * REPLACE(ST_CENTROID(geom) AS geom) FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
     }
     else {
       queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
