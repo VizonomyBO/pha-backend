@@ -389,9 +389,9 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
 router.delete('/pha', async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const { ids } = body;
-  const { table } = req.params;
+  const { table = '' } = req.query;
   try {
-    const response = await deleteFromTable(table, ids);
+    const response = await deleteFromTable(table as string, ids);
     res.send({ success: true, data: response });
   } catch (error) {
     next(error);
