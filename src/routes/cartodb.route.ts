@@ -23,14 +23,15 @@ import {
   deleteOsmPoint,
   jobClusterTables,
   getJob,
-  deleteFromTable
+  deleteFromTable,
+  deleteFromTableIndividual
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
 import ImageUploadService from '../services/ImageUpload.service';
 import { uploadFilesToGoogle } from '../utils';
 import logger from '../utils/LoggerUtil';
-import { IMAGELINKS, INDIVIDUAL, OWNER_PHOTO, RETAILER } from '../constants';
+import { IMAGELINKS, INDIVIDUAL, OWNER_PHOTO, PHA_INDIVIDUAL, RETAILER, RETAILERS_PHA } from '../constants';
 
 const router = express.Router();
 const upload = ImageUploadService.getUploadFields();
@@ -389,9 +390,20 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
 router.delete('/pha', async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const { ids } = body;
-  const { table } = req.params;
+  const table = RETAILERS_PHA;
   try {
     const response = await deleteFromTable(table, ids);
+    res.send({ success: true, data: response });
+  } catch (error) {
+    next(error);
+  }
+});
+router.delete('/pha-individual-delete', async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const { ids } = body;
+  const table = PHA_INDIVIDUAL;
+  try {
+    const response = await deleteFromTableIndividual(table, ids);
     res.send({ success: true, data: response });
   } catch (error) {
     next(error);
