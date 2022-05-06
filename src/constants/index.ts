@@ -29,7 +29,8 @@ export const RETAILERS_USDA_SOURCE = 'retailers_usda';
 export const DATA_SOURCES = {
   'retailers_pha': PHA_RETAILER_TABLE,
   'retailers_osm': RETAILERS_OSM,
-  'retailers_usda': RETAILERS_USDA
+  'retailers_usda': RETAILERS_USDA,
+  'pha_individual': PHA_INDIVIDUAL,
 };
 
 export const IMAGELINKS = 'imagelinks';
