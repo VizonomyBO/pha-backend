@@ -36,9 +36,7 @@ import {
   insertPHARetailerQuery,
   updatePHAIndividualQuery,
   updatePHARetailerQuery,
-  deleteQuery,
-  deleteQueryRetailer,
-  deleteQueryIndividual
+  deleteQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 
@@ -493,20 +491,7 @@ export const deleteFromTable = async (table: string, ids: string[]) => {
   logger.info('Executing function: deleteFromTable');
   const params = JSON.stringify({table, ids});
   logger.info(`with params: ${params}`);
-  const query = deleteQueryRetailer(table, ids);
-  try {
-    const response = getRequestToCarto(query);
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export const deleteFromTableIndividual = async (table: string, ids: string[]) => {
-  logger.info('Executing function: deleteFromTable');
-  const params = JSON.stringify({table, ids});
-  logger.info(`with params: ${params}`);
-  const query = deleteQueryIndividual(table, ids);
+  const query = deleteQuery(table, ids);
   try {
     const response = getRequestToCarto(query);
     return response;

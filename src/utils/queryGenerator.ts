@@ -461,15 +461,3 @@ export const deleteQuery = (table: string, ids: string[]) => {
   const query = `DELETE FROM ${DATA_SOURCES[table]} WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
   return query;
 }
-
-export const deleteQueryRetailer = (table: string, ids: string[]) => {
-  const query = `DELETE FROM ${PHA_RETAILER_TABLE}
-  ${ids.length ? `WHERE retailer_id IN (${ids.map((a) => `'${a}'`).join(', ')});` : ';'}`;
-  return query;
-}
-
-export const deleteQueryIndividual = (table: string, ids: string[]) => {
-  const query = `DELETE FROM ${PHA_INDIVIDUAL}
-  ${ids.length ? `WHERE individual_id IN (${ids.map((a) => `'${a}'`).join(', ')});` : ';'}`;
-  return query;
-}
