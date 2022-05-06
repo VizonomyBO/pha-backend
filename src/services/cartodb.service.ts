@@ -110,9 +110,9 @@ export const getJob = async (job: string) => {
 
 export const jobClusterTables = async () => {
   const query = `
-    CREATE OR REPLACE TABLE ${PHA_RETAILER_TABLE}_clustered CLUSTER BY geom AS (SELECT * FROM ${PHA_RETAILER_TABLE});
-    CREATE OR REPLACE TABLE ${RETAILERS_OSM}_clustered CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_OSM});
-    CREATE OR REPLACE TABLE ${RETAILERS_USDA}_clustered CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_USDA});
+    CREATE OR REPLACE TABLE ${PHA_RETAILER_TABLE} CLUSTER BY geom AS (SELECT * FROM ${PHA_RETAILER_TABLE});
+    CREATE OR REPLACE TABLE ${RETAILERS_OSM} CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_OSM});
+    CREATE OR REPLACE TABLE ${RETAILERS_USDA} CLUSTER BY geom AS (SELECT * FROM ${RETAILERS_USDA});
   `;
   const runJob = await sendJobToCarto(query);
   return runJob;

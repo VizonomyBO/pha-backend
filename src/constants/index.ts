@@ -8,9 +8,9 @@ export const REQUIRED_VARIABLES = {
 
 export const DOMAIN = '@localhost.com'
 export const CONNECTION_NAME = 'carto_dw';
-export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer';
-export const RETAILERS_OSM = 'carto-dw-ac-j9wxt0nz.shared.2022_OpenStreetMap_Mississippi';
-export const RETAILERS_USDA = 'carto-dw-ac-j9wxt0nz.shared.USDA_Farmers_MS';
+export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered';
+export const RETAILERS_OSM = 'carto-dw-ac-j9wxt0nz.shared.2022_OpenStreetMap_Mississippi_clustered';
+export const RETAILERS_USDA = 'carto-dw-ac-j9wxt0nz.shared.USDA_Farmers_MS_clustered';
 export const PHA_INDIVIDUAL = 'carto-dw-ac-j9wxt0nz.shared.pha_individual';
 export const MISSISSIPPI_TABLE = 'carto-dw-ac-j9wxt0nz.shared.mississippi';
 export const CARTO_AUTH_URL = 'https://auth.carto.com/oauth/token';
