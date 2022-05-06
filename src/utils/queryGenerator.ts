@@ -455,3 +455,9 @@ export const getDeleteOsmPointQuery = (id: string) => {
   `;
   return query;
 }
+
+export const deleteQuery = (table: string, ids: string[]) => {
+  const column = RETAILERS_PHA === table ? 'retailers_id': 'individual_id';
+  const query = `DELETE FROM ${DATA_SOURCES[table]} WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
+  return query;
+}

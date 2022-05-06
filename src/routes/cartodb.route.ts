@@ -22,7 +22,8 @@ import {
   deleteJob,
   deleteOsmPoint,
   jobClusterTables,
-  getJob
+  getJob,
+  deleteFromTable
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -381,6 +382,18 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
     res.send({ success: true, data: response });
   } catch (error) {
     console.log(error);
+    next(error);
+  }
+});
+
+router.delete('/pha', async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const { ids } = body;
+  const { table } = req.params;
+  try {
+    const response = await deleteFromTable(table, ids);
+    res.send({ success: true, data: response });
+  } catch (error) {
     next(error);
   }
 });
