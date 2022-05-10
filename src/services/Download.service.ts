@@ -17,7 +17,7 @@ class DownloadService {
 
     mkdirSync(folderPath);
     this.generateCsv(rows, folderPath);
-    this.generateImagesFolders(rows, folderPath);
+    await this.generateImagesFolders(rows, folderPath);
 
     const output = createWriteStream(outputPath);
     const archive = archiver(EXTENSION_ZIP);
@@ -47,16 +47,18 @@ class DownloadService {
     });
   }
 
-  generateImagesFolders(rows: PhaRetailer[], folderPath: string) {
-    rows.forEach((row) => {
+  async generateImagesFolders(rows: PhaRetailer[], folderPath: string) {
+    const promises = rows.reduce((arr, row) => {
       const imageFolderPath = folderPath.concat(`/${row.retailer_id}`);
       mkdirSync(imageFolderPath);
-      row.imagelinks.split(',')
+      const promises = row.imagelinks.split(',')
         .filter(r => !!r)
-        .forEach(async (image) => {
-          await this.downloadImage(image, imageFolderPath);
+        .map((image) => {
+          return this.downloadImage(image, imageFolderPath);
         });
-    });
+      return [...arr, ...promises]
+    }, []);
+    await Promise.all(promises);
   }
 
   generateCsv(rows: PhaRetailer[], folderPath: string) {
