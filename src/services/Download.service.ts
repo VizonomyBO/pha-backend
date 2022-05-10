@@ -48,11 +48,14 @@ class DownloadService {
   }
 
   async generateImagesFolders(rows: PhaRetailer[], folderPath: string) {
+    const indexMap = {};
     const promises = rows.reduce((arr, row) => {
-      const imageFolderPath = folderPath.concat(`/${row.retailer_id}`);
+      let index = indexMap[row.name] ?? 0;
+      indexMap[row.name] = index + 1;
+      const imageFolderPath = folderPath.concat(`/${row.name}_${index + 1}`);
       mkdirSync(imageFolderPath);
       const promises = row.imagelinks.split(',')
-        .filter(r => !!r)
+        .filter(r => (!!r && r.startsWith('http')))
         .map((image) => {
           return this.downloadImage(image, imageFolderPath);
         });
@@ -65,7 +68,7 @@ class DownloadService {
     const json2csv = new Parser({ fields: Object.keys(rows[0]) });
     const csv = json2csv.parse(rows);
     const now = new Date();
-    const filename = `${FILENAME_CSV_RETAILER}-${now.toISOString()}.${EXTENSION_CSV}`;
+    const filename = `${FILENAME_CSV_RETAILER}-${now.toISOString().split('T')[0]}.${EXTENSION_CSV}`;
     writeFileSync(`${folderPath}/${filename}`, csv);
   }
 
