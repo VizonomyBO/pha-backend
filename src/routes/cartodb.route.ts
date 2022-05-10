@@ -304,10 +304,7 @@ router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: 
 router.post('/pha-retailer/download', async (req: Request, res: Response, next: NextFunction) => {
   const body = req.body;
   try {
-    const response =  await getPHARetailerCSV(body.retailerIds);
-    res.header('Content-Type', 'text/csv');
-    res.attachment('PHA-retailer.csv');
-    res.send(response);
+    await getPHARetailerCSV(body.retailerIds, res);
   } catch (error) {
     next(error);
   }

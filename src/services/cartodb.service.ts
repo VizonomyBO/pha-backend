@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Parser } from 'json2csv';
 import { v4 as uuidv4 } from 'uuid';
+import { Response } from 'express';
 import { FiltersInterface, QueryParams, Propierties } from '../@types';
 import { PhaIndividual, PhaRetailer } from '../@types/database';
 import NotFoundError from '../errors/NotFoundError';
@@ -39,6 +40,7 @@ import {
   deleteQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
+import DownloadService from './Download.service';
 
 const getJobStatus = async (job: string) => {
   logger.info("executing function: getRequestToCarto");
@@ -500,16 +502,14 @@ export const deleteFromTable = async (table: string, ids: string[]) => {
   }
 }
 
-export const getPHARetailerCSV = async (retailerIds: string[]) => {
+export const getPHARetailerCSV = async (retailerIds: string[], res: Response) => {
   logger.info("executing function: getPHARetailerCSV");
   const params = JSON.stringify(retailerIds);
   logger.debug(`with params: ${params}`);
   const query = getPHARetailerCSVQuery(retailerIds);
   try{
     const response = await getRequestToCarto(query);
-    const json2csv = new Parser({fields: Object.keys(response.rows[0])});
-    const csv = json2csv.parse(response.rows);
-    return csv;
+    DownloadService.generateZip(response.rows, res);
   } catch (error) {
     throw error;
   }
