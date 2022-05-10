@@ -63,7 +63,7 @@ class DownloadService {
     const json2csv = new Parser({ fields: Object.keys(rows[0]) });
     const csv = json2csv.parse(rows);
     const now = new Date();
-    const filename = `${FILENAME_CSV_RETAILER}-${now.toISOString()}${EXTENSION_CSV}`;
+    const filename = `${FILENAME_CSV_RETAILER}-${now.toISOString()}.${EXTENSION_CSV}`;
     writeFileSync(`${folderPath}/${filename}`, csv);
   }
 
