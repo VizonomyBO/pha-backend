@@ -37,7 +37,8 @@ import {
   insertPHARetailerQuery,
   updatePHAIndividualQuery,
   updatePHARetailerQuery,
-  deleteQuery
+  deleteQuery,
+  approveQuery,
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -494,6 +495,19 @@ export const deleteFromTable = async (table: string, ids: string[]) => {
   const params = JSON.stringify({table, ids});
   logger.info(`with params: ${params}`);
   const query = deleteQuery(table, ids);
+  try {
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const approveFromTable = async (table: string, ids: string[]) => {
+  logger.info('Executing function: approveFromTable');
+  const params = JSON.stringify({table, ids});
+  logger.info(`with params: ${params}`);
+  const query = approveQuery(table, ids);
   try {
     const response = getRequestToCarto(query);
     return response;
