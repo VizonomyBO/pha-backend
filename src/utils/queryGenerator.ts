@@ -463,3 +463,15 @@ export const deleteQuery = (table: string, ids: string[]) => {
   const query = `DELETE FROM ${DATA_SOURCES[table]} WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
   return query;
 }
+
+export const approveQuery = (table: string, ids: string[]) => {
+  const column = RETAILERS_PHA === table ? 'retailer_id': 'individual_id';
+  const update_date = new Date().toISOString();
+  const query = `
+    UPDATE ${DATA_SOURCES[table]}
+    SET 
+      update_date = TIMESTAMP('${update_date}'),
+      submission_status = 'Approved'
+    WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
+  return query;
+}
