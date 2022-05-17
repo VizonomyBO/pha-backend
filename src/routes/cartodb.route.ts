@@ -116,7 +116,7 @@ router.get('/pha-retailer', async (req: Request, res: Response, next: NextFuncti
 });
 
 router.get('/dashboard', async (req: Request, res: Response, next: NextFunction) => {
-  const { page = 1, limit = 10, status = '', search = '', dateRange = '', isRetailer = 'false' } = req.query;
+  const { page = 1, limit = 10, status = '', search = '', dateRange = '', isRetailer = 'false', isUnvalidated = 'false' } = req.query;
   try {
     const queryParams: QueryParams = {
       page: +page,
@@ -124,7 +124,8 @@ router.get('/dashboard', async (req: Request, res: Response, next: NextFunction)
       status: status as string,
       search: search as string,
       dateRange: dateRange as string,
-      isRetailer: isRetailer === 'true'
+      isRetailer: isRetailer === 'true',
+      isUnvalidated: isUnvalidated === 'true'
     };
     const response = await getDashboard(queryParams);
     res.send({ data: response, success: true });

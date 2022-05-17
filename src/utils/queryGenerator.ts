@@ -175,6 +175,15 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
   let query = `SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
     ${where} ORDER BY submission_date DESC ${suffix}`;
   console.log(queryParams);
+  if (queryParams.isUnvalidated) {
+    const unionQuery = `SELECT name, address, postcode as zipcode, osm_timestamp as submission_date FROM ${RETAILERS_OSM}
+    UNION ALL
+    SELECT listing_name as name , location_address as address, NULL as zipcode, submission_date2 as submission_date FROM ${RETAILERS_USDA}`;
+    const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${queryParams.limit} OFFSET ${(queryParams.page - 1) * queryParams.limit}`;
+    const auxQuery = `WITH aux AS (${unionQuery})
+    SELECT *, count(*) over() as total FROM aux ${limitQuery}`;
+    return auxQuery;
+  }
   if (!queryParams.isRetailer) {
     console.log('faqiu');
     return `SELECT ${fieldsToReturn}, zipcode, individual_id FROM (${individualQuery}) ${where}
