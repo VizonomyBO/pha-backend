@@ -17,7 +17,8 @@ export interface QueryParams {
   search: string,
   status: string, 
   dateRange: string,
-  isRetailer?: boolean
+  isRetailer?: boolean,
+  isUnvalidated?: boolean
 };
 export interface Credentials {
   username: string;
