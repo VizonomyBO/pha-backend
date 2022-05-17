@@ -176,9 +176,35 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
     ${where} ORDER BY submission_date DESC ${suffix}`;
   console.log(queryParams);
   if (queryParams.isUnvalidated) {
-    const unionQuery = `SELECT name, address, postcode as zipcode, osm_timestamp as submission_date FROM ${RETAILERS_OSM}
+    const unionQuery = `SELECT
+      name,
+      CAST(master_id as STRING) as retailer_id,
+      NULL as imagelinks,
+      address as address_1,
+      CAST(postcode as STRING) as zipcode,
+      ST_CENTROID(geom) as geom,
+      NULL as state,
+      NULL as city,
+      NULL as wic_accepted,
+      NULL as snap_accepted,
+      osm_timestamp as submission_date,
+      NULL as phone
+    FROM ${RETAILERS_OSM}
     UNION ALL
-    SELECT listing_name as name , location_address as address, NULL as zipcode, submission_date2 as submission_date FROM ${RETAILERS_USDA}`;
+    SELECT
+      listing_name as name,
+      CAST(listing_id as STRING) as retailer_id,
+      NULL as imagelinks,
+      location_address as address_1,
+      NULL as zipcode,
+      geom,
+      NULL as city,
+      NULL as state,
+      NULL as wic_accepted,
+      NULL as snap_accepted,
+      submission_date2 as submission_date,
+      NULL as phone
+    FROM ${RETAILERS_USDA}`;
     const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${queryParams.limit} OFFSET ${(queryParams.page - 1) * queryParams.limit}`;
     const auxQuery = `WITH aux AS (${unionQuery})
     SELECT *, count(*) over() as total FROM aux ${limitQuery}`;
