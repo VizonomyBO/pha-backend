@@ -295,8 +295,9 @@ router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: 
 } ,async (req: RequestWithFiles, res: Response, next: NextFunction) => {
   const { body } = req;
   const retailer = body as PhaRetailer;
+  const isUnvalidated = req.query['isUnvalidated'] === 'true';
   try {
-    const data = await insertIntoPHARetailer(retailer);
+    const data = await insertIntoPHARetailer(retailer, isUnvalidated);
     res.send({ data: data, success: true });
   } catch (error) {
     console.log('here');
