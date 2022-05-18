@@ -447,12 +447,14 @@ export const getDashboardCount = async (queryParams: QueryParams) => {
   }
 };
 
-export const insertIntoPHARetailer = async (retailer: PhaRetailer) => {
+export const insertIntoPHARetailer = async (retailer: PhaRetailer, isUnvalidated?: boolean) => {
   logger.info("executing function: insertIntoPHARetailer");
   const params = JSON.stringify(retailer);
   logger.debug(`with params: ${params}`);
   retailer.submission_date = (new Date()).toISOString();
-  retailer.submission_status = 'Pending';
+  if (!isUnvalidated) {
+    retailer.submission_status = 'Pending';
+  }
   retailer.retailer_id = uuidv4();
   const query = insertPHARetailerQuery(retailer);
   try{
