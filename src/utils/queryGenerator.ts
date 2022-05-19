@@ -488,7 +488,14 @@ export const getPHAIndividualCSVQuery = (individualIds: string[]): string => {
 
 export const getDeleteOsmPointQuery = (id: string) => {
   const query = `
-    DELETE FROM ${RETAILERS_OSM} where master_id = ${id}
+    DELETE FROM ${RETAILERS_OSM} where CAST(master_id as STRING) = ${id}
+  `;
+  return query;
+}
+
+export const getDeleteUSDAPointQuery = (id: string) => {
+  const query = `
+    DELETE FROM ${RETAILERS_USDA} where CAST(listing_id as STRING) = ${id}
   `;
   return query;
 }

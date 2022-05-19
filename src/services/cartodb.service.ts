@@ -42,6 +42,7 @@ import {
   approveQuery,
   deleteOSMQuery,
   deleteUSDQuery,
+  getDeleteUSDAPointQuery,
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -567,3 +568,15 @@ export const deleteOsmPoint = async (osmId: string) => {
   }
 }
 
+export const deleteUnvalidatedPoint = async (id: string) => {
+  logger.info("executing function: deleteUnvalidatedPoint");
+  try {
+    let query = getDeleteOsmPointQuery(id);
+    await getRequestToCarto(query);
+    query = getDeleteUSDAPointQuery(id);
+    return await getRequestToCarto(query)
+  } catch(error) {
+    console.error(error);
+    throw error;
+  }
+}
