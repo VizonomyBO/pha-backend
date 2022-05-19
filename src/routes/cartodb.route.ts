@@ -25,6 +25,7 @@ import {
   getJob,
   deleteFromTable,
   approveFromTable,
+  deleteUnvalidatedPoint,
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -380,6 +381,17 @@ router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFu
   const id = req.params.id;
   try {
     const response = await deleteOsmPoint(id);
+    res.send({ success: true, data: response });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.delete('/unvalidated/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+  try {
+    const response = await deleteUnvalidatedPoint(id);
     res.send({ success: true, data: response });
   } catch (error) {
     console.log(error);
