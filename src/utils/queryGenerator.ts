@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, MISSISSIPPI_TABLE, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE } from '../constants';
+import { DATA_SOURCES, MISSISSIPPI_TABLE, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE, UNVALIDATED } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -496,6 +496,18 @@ export const getDeleteOsmPointQuery = (id: string) => {
 export const deleteQuery = (table: string, ids: string[]) => {
   const column = RETAILERS_PHA === table ? 'retailer_id': 'individual_id';
   const query = `DELETE FROM ${DATA_SOURCES[table]} WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
+  return query;
+}
+
+export const deleteOSMQuery = (ids: string[]) => {
+  const column = 'master_id';
+  const query = `DELETE FROM ${RETAILERS_OSM} WHERE CAST(${column} as STRING) IN (${ids.map((a) => `'${a}'`).join(', ')});`;
+  return query;
+}
+
+export const deleteUSDQuery = (ids: string[]) => {
+  const column = 'listing_id';
+  const query = `DELETE FROM ${RETAILERS_USDA} WHERE CAST(${column} as STRING) IN (${ids.map((a) => `'${a}'`).join(', ')});`;
   return query;
 }
 

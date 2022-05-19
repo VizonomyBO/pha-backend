@@ -17,7 +17,8 @@ import {
   RETAILER,
   INDIVIDUAL,
   RETAILERS_OSM,
-  RETAILERS_USDA
+  RETAILERS_USDA,
+  UNVALIDATED
 } from '../constants'
 import logger from '../utils/LoggerUtil';
 import { 
@@ -39,6 +40,8 @@ import {
   updatePHARetailerQuery,
   deleteQuery,
   approveQuery,
+  deleteOSMQuery,
+  deleteUSDQuery,
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -498,6 +501,12 @@ export const deleteFromTable = async (table: string, ids: string[]) => {
   logger.info(`with params: ${params}`);
   const query = deleteQuery(table, ids);
   try {
+    if (table === UNVALIDATED) {
+      let query = deleteOSMQuery(ids);
+      let response = getRequestToCarto(query);
+      query = deleteUSDQuery(ids);
+      return response = getRequestToCarto(query);
+    }
     const response = getRequestToCarto(query);
     return response;
   } catch (error) {
