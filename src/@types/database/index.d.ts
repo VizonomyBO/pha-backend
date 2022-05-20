@@ -57,6 +57,8 @@ export interface PhaRetailer {
   submission_status?: string,
   imagelinks: string,
   update_date?: Date | number | string,
+  permanently_closed?: string,
+  superstar_badge?: string,
 }
 
 export interface PhaIndividual {
@@ -76,4 +78,5 @@ export interface PhaIndividual {
   submission_date?: Date | number | string,
   submission_status?: string,
   update_date?: Date | number | string,
+  permanently_closed?: string,
 }
