@@ -166,13 +166,13 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
   const individualQuery = getIndividualQuery();
   const retailerQuery = getRetailerQuery();
   const fieldsToReturn = `retailer_id, name, submission_date, submission_status, address_1, contact_name,
-  contact_email`;
+  contact_email, permanently_closed`;
   const {where: whereArray, suffix} = generateWhereArray(queryParams);
   let where = '';
   if (whereArray.length) {
     where = `WHERE ${whereArray.join(' AND ')}`;
   }
-  let query = `SELECT ${fieldsToReturn}, zipcode FROM (${retailerQuery})
+  let query = `SELECT ${fieldsToReturn}, superstar_badge, zipcode FROM (${retailerQuery})
     ${where} ORDER BY submission_date DESC ${suffix}`;
   console.log(queryParams);
   if (queryParams.isUnvalidated) {
