@@ -26,6 +26,7 @@ import {
   deleteFromTable,
   approveFromTable,
   deleteUnvalidatedPoint,
+  updateSwitchColumn
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -395,6 +396,16 @@ router.delete('/unvalidated/:id', async (req: Request, res: Response, next: Next
     res.send({ success: true, data: response });
   } catch (error) {
     console.log(error);
+    next(error);
+  }
+});
+router.put('/update-switch/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const body = req.body;
+  const id = req.params.id;
+  try {
+    const data = await updateSwitchColumn(id, body.value, body.field);
+    res.send({ data: data, success: true });
+  } catch (error) {
     next(error);
   }
 });
