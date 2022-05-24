@@ -26,7 +26,8 @@ import {
   deleteFromTable,
   approveFromTable,
   deleteUnvalidatedPoint,
-  updateSwitchColumn
+  updateSwitchColumn,
+  getImagesFromIndividual
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -399,6 +400,18 @@ router.delete('/unvalidated/:id', async (req: Request, res: Response, next: Next
     next(error);
   }
 });
+
+router.get('/individual-images/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+  try {
+    const response = await getImagesFromIndividual(id);
+    res.send({ success: true, data: response });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 router.put('/update-switch/:id', async (req: Request, res: Response, next: NextFunction) => {
   const body = req.body;
   const id = req.params.id;
