@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, MISSISSIPPI_TABLE, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE, UNVALIDATED } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -316,6 +316,16 @@ export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string
     ${`${fields.map((elem) => {
       return `${elem.key} =  '${elem.value}'`;
     }).join(', ')}`}
+  WHERE retailer_id = '${retailerId}';`; 
+  return query;
+}
+
+export const updateSwitch = (retailerId: string, value: string, field: string) => {
+  const query = `
+  UPDATE ${PHA_RETAILER_TABLE}
+  SET
+    ${field} = '${value}',
+    ${field}_update = TIMESTAMP('${new Date().toISOString()}')
   WHERE retailer_id = '${retailerId}';`; 
   return query;
 }

@@ -43,6 +43,7 @@ import {
   deleteOSMQuery,
   deleteUSDQuery,
   getDeleteUSDAPointQuery,
+  updateSwitch
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -520,6 +521,19 @@ export const approveFromTable = async (table: string, ids: string[]) => {
   const params = JSON.stringify({table, ids});
   logger.info(`with params: ${params}`);
   const query = approveQuery(table, ids);
+  try {
+    const response = getRequestToCarto(query);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateSwitchColumn = async (retailerId: string, value: string, field: string) => {
+  logger.info('Executing function: updSuperStar');
+  const params = JSON.stringify({retailerId, value});
+  logger.info(`with params: ${params}`);
+  const query = updateSwitch(retailerId, value, field);
   try {
     const response = getRequestToCarto(query);
     return response;
