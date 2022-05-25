@@ -9,7 +9,7 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
 export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
   const where: string[][] = [];
   if (who === RETAILERS_PHA) {
-    where.push(["submission_status = 'Approved'", "permanently_closed != 'Yes'"]);
+    where.push(["submission_status = 'Approved' AND permanently_closed != 'Yes'"]);
   }
   if (filters.categories) {
     const row: string[] = [];
