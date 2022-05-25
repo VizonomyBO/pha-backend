@@ -9,7 +9,7 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
 export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
   const where: string[][] = [];
   if (who === RETAILERS_PHA) {
-    where.push(["submission_status = 'Approved'"]);
+    where.push(["submission_status = 'Approved'", "permanently_closed != 'Yes'"]);
   }
   if (filters.categories) {
     const row: string[] = [];
@@ -211,7 +211,6 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
     return auxQuery;
   }
   if (!queryParams.isRetailer) {
-    console.log('faqiu');
     return `SELECT ${fieldsToReturn}, zipcode, individual_id FROM (${individualQuery}) ${where}
       ORDER BY submission_date DESC ${suffix}`;
   }
@@ -222,6 +221,11 @@ export const getRowsOnDashboard = (queryParams: QueryParams) => {
   const query = getDashboardQuery(queryParams).replace(/OFFSET \d+/g, '').replace(/LIMIT \d+/g, '');
   const countQuery = `SELECT COUNT(*) as count FROM (${query}) AS count`;
   return countQuery;
+}
+
+export const getImagesQuery = (retailerId: string) => {
+  const query = `SELECT imagelinks FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved' AND retailer_id = '${retailerId}'`;
+  return query;
 }
 
 export const generateWhereArray = (queryParams: QueryParams) => {

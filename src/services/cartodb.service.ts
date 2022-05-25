@@ -43,7 +43,8 @@ import {
   deleteOSMQuery,
   deleteUSDQuery,
   getDeleteUSDAPointQuery,
-  updateSwitch
+  updateSwitch,
+  getImagesQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -363,6 +364,22 @@ export const getProfile = async (id: string) => {
     }
     return response.rows[0];
   } catch (error) {
+    throw error;
+  }
+}
+
+export const getImagesFromIndividual =  async (reatailerId: string) => {
+  logger.info("executing function: getImagesFromIndividual");
+  const query = getImagesQuery(reatailerId);
+  try {
+    const data = await getRequestToCarto(query);
+    const imageslinks: any = [];
+    data.rows.map(row => row.imagelinks).forEach(links => {
+      links.split(',').forEach(link => imageslinks.push(link));
+    });
+    return imageslinks;
+  } catch(error) {
+    console.error(error);
     throw error;
   }
 }
