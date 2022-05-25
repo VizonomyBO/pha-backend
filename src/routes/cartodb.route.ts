@@ -413,7 +413,7 @@ router.get('/individual-images/:id', async (req: Request, res: Response, next: N
 });
 
 router.put('/update-switch/:id', async (req: Request, res: Response, next: NextFunction) => {
-  const body = req.body;
+  const { body } = req;
   const id = req.params.id;
   try {
     const data = await updateSwitchColumn(id, body.value, body.field);

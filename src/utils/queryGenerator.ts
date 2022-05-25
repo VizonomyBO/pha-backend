@@ -57,7 +57,7 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
   const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
-    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone'];
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone', 'superstar_badge'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
@@ -82,6 +82,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('snap_option', 'NULL as snap_option');
       finalFields = finalFields.replace('submission_date','osm_timestamp as submission_date');
       finalFields = finalFields.replace('phone', 'NULL as phone');
+      finalFields = finalFields.replace('superstar_badge', "'NO' as superstar_badge");
     }
     if (source === RETAILERS_USDA_SOURCE) {
       finalFields = fields.join(', ');
@@ -96,6 +97,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('snap_accepted', 'NULL as snap_accepted');
       finalFields = finalFields.replace('submission_date', 'submission_date2 as submission_date');
       finalFields = finalFields.replace('phone', 'NULL as phone');
+      finalFields = finalFields.replace('superstar_badge', "'NO' as superstar_badge");
     }
     if (source === RETAILERS_PHA) {
       queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where})`);
