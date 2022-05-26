@@ -46,7 +46,8 @@ import {
   updateSwitch,
   getImagesQuery,
   getRetailersByMonthQuery,
-  countSuperstarByMonthQuery
+  countSuperstarByMonthQuery,
+  automaicallySetSuperstarBadgeQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -623,6 +624,21 @@ export const deleteOsmPoint = async (osmId: string) => {
     return response.rows[0];
   } catch(error) {
     console.error(error);
+    throw error;
+  }
+}
+
+export const runSuperstarJob = async () => {
+  logger.info("executing function: runSuperstarJob");
+  const query = automaicallySetSuperstarBadgeQuery();
+  try {
+    const response = await getRequestToCarto(query);
+    logger.info(`response: ${JSON.stringify(response)}`);
+    logger.info(`response.rows: ${JSON.stringify(response.rows)}`);
+    logger.info('END JOB');
+    return response;
+  } catch (error) {
+    logger.error('JOB FAILED');
     throw error;
   }
 }

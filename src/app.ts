@@ -5,6 +5,7 @@ validateEnvFile();
 
 // All imports
 import * as express from 'express';
+import * as cron from 'node-cron';
 import { Request, Response, NextFunction } from 'express';
 import * as swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
@@ -13,6 +14,7 @@ import router from './routes';
 import ResponseError from '@/@types/';
 import logger from './utils/LoggerUtil';
 import { ERROR_CODE_DEFAULT } from './constants';
+import { runSuperstarJob } from './services/cartodb.service';
 
 const app = express();
 app.use(express.json());
@@ -21,6 +23,13 @@ app.use(cors());
 app.options('*', cors());
 app.use('/', router);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+const task = cron.schedule('0 * * * *', () => {
+  logger.info('Running Cron Job');
+  runSuperstarJob();
+});
+
+task.start();
 
 app.use(
   (

@@ -579,7 +579,7 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     SELECT
       FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
       count(*) as count
-      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
+      , COUNT((CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
       , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
     FROM ${PHA_RETAILER_TABLE}
     WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
@@ -588,4 +588,43 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     GROUP BY month
   `;
   return query;
-};
+}
+
+export const automaicallySetSuperstarBadgeQuery = () => {
+  const query = `
+  UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+  SET superstar_badge = 'Yes'
+  WHERE submission_status = 'Approved'
+  AND manual IS NOT TRUE
+  AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL}
+        GROUP BY retailer_id) ) WHERE fresh_percentage >= 0.5
+        AND acceptable_percentage >= 0.5
+        AND visible_percentage >= 0.5
+        AND local_percentage >= 0.5
+      )
+    )
+  `;
+  return query;
+}
