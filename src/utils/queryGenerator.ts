@@ -154,13 +154,13 @@ export const getIndividualQuery = (queryParams?: QueryParams) => {
 
 export const getRetailerQuery = (queryParams?: QueryParams) => {
   let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
- /* if (queryParams) {
+  if (queryParams) {
     const {where, suffix} = generateWhereArray(queryParams);
     if (where.length) {
       query += ` WHERE ${where.join(' AND ')}`;
     }
     query += suffix;
-  }*/
+  }
   return query;
 };
 
