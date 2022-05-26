@@ -27,7 +27,8 @@ import {
   approveFromTable,
   deleteUnvalidatedPoint,
   updateSwitchColumn,
-  getImagesFromIndividual
+  getImagesFromIndividual,
+  getRetailersByMonth
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -211,6 +212,16 @@ router.post('/pha-individual/download', async (req: Request, res: Response, next
     res.header('Content-Type', 'text/csv');
     res.attachment('PHA-individual.csv');
     res.send(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/count-retailers-by-month', async (req: Request, res: Response, next: NextFunction) => {
+  const { dateRange = '' } = req.query;
+  try {
+    const response = await getRetailersByMonth(dateRange as string);
+    res.send({ data: response, success: true });
   } catch (error) {
     next(error);
   }

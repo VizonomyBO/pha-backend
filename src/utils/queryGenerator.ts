@@ -545,3 +545,18 @@ export const approveQuery = (table: string, ids: string[]) => {
     WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
   return query;
 }
+
+export const getRetailersByMonthQuery = (dateRange: string) => {
+  const [startDate, endDate] = dateRange.split(' - ');
+  const query = `
+    SELECT
+      EXTRACT(MONTH FROM submission_date) as month,
+      count(*) as count
+    FROM ${PHA_INDIVIDUAL}
+    WHERE submission_date >= TIMESTAMP('${startDate}')
+    AND submission_date <= TIMESTAMP('${endDate}')
+    AND  submission_status = 'Approved'
+    GROUP BY month
+  `;
+  return query;
+}
