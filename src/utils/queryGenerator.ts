@@ -339,11 +339,13 @@ export const updatePHARetailerQuery = (retailer: PhaRetailer, retailerId: string
 }
 
 export const updateSwitch = (retailerId: string, value: string, field: string) => {
+  const extra = field === 'superstar_badge' ? `, superstar_badge_update = TIMESTAMP('${new Date().toISOString()}'), manual = TRUE` : '';
   const query = `
   UPDATE ${PHA_RETAILER_TABLE}
   SET
     ${field} = '${value}',
     ${field}_update = TIMESTAMP('${new Date().toISOString()}')
+    ${extra}
   WHERE retailer_id = '${retailerId}';`; 
   return query;
 }
