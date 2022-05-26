@@ -44,5 +44,7 @@ export interface FiltersInterface {
   accesibility: string[],
   dataSources: string[],
   badges: string[],
+  verifiedDateRange?: string[],
+  superstarDateRange?: string[],
   bbox?: GoogleBbox
 };

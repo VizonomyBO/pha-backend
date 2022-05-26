@@ -45,7 +45,8 @@ import {
   getDeleteUSDAPointQuery,
   updateSwitch,
   getImagesQuery,
-  getRetailersByMonthQuery
+  getRetailersByMonthQuery,
+  countSuperstarByMonthQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -435,6 +436,19 @@ export const getRetailersByMonth = async (dateRange: string) => {
   logger.debug(`with params: ${params}`);
   try {
     const query = getRetailersByMonthQuery(dateRange);
+    const response = await getRequestToCarto(query);
+    return response;
+  } catch(error) {
+    throw error;
+  }
+}
+
+export const getCountOfSuperstar = async (dateRange: string) => {
+  logger.info("executing function: getCountOfSuperstar");
+  const params = JSON.stringify(dateRange);
+  logger.debug(`with params: ${params}`);
+  try {
+    const query = countSuperstarByMonthQuery(dateRange);
     const response = await getRequestToCarto(query);
     return response;
   } catch(error) {
