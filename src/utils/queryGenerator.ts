@@ -11,6 +11,18 @@ export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
   if (who === RETAILERS_PHA) {
     where.push(["submission_status = 'Approved' AND permanently_closed != 'Yes'"]);
   }
+  if (filters.verifiedDateRange) {
+    where.push(
+      [`update_date >= TIMESTAMP('${filters.verifiedDateRange[0]}') 
+      AND update_date <= TIMESTAMP('${filters.verifiedDateRange[1]}')`]
+    );
+  }
+  if (filters.superstarDateRange) {
+    where.push(
+      [`superstar_badge_update >= TIMESTAMP('${filters.superstarDateRange[0]}') 
+      AND superstar_badge_update <= TIMESTAMP('${filters.superstarDateRange[1]}')`]
+    );
+  }
   if (filters.categories) {
     const row: string[] = [];
     filters.categories.forEach(category => {
