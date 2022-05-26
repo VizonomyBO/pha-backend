@@ -18,6 +18,20 @@ const schema: JSONSchemaType<FiltersInterface> = {
         type: 'string',
       }
     },
+    verifiedDateRange: {
+      type: 'array',
+      nullable: true,
+      items: {
+        type: 'string',
+      }
+    },
+    superstarDateRange: {
+      type: 'array',
+      nullable: true,
+      items: {
+        type: 'string',
+      }
+    },
     dataSources: {
       type: 'array',
       items: {
