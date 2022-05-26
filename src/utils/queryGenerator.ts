@@ -552,7 +552,9 @@ export const getRetailersByMonthQuery = (dateRange: string) => {
     SELECT
       FORMAT_DATE('%m-%Y', DATE(submission_date)) as month,
       count(*) as count
-    FROM ${PHA_INDIVIDUAL}
+      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
+    FROM ${PHA_RETAILER_TABLE}
     WHERE submission_date >= TIMESTAMP('${startDate}')
     AND submission_date <= TIMESTAMP('${endDate}')
     AND  submission_status = 'Approved'
