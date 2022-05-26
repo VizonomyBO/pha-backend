@@ -550,7 +550,7 @@ export const getRetailersByMonthQuery = (dateRange: string) => {
   const [startDate, endDate] = dateRange.split(' - ');
   const query = `
     SELECT
-      EXTRACT(MONTH FROM submission_date) as month,
+      FORMAT_DATE('%m-%Y', DATE(submission_date)) as month,
       count(*) as count
     FROM ${PHA_INDIVIDUAL}
     WHERE submission_date >= TIMESTAMP('${startDate}')
