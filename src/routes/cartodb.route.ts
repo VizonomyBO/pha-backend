@@ -28,7 +28,8 @@ import {
   deleteUnvalidatedPoint,
   updateSwitchColumn,
   getImagesFromIndividual,
-  getRetailersByMonth
+  getRetailersByMonth,
+  getCountOfSuperstar
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -221,6 +222,16 @@ router.get('/count-retailers-by-month', async (req: Request, res: Response, next
   const { dateRange = '' } = req.query;
   try {
     const response = await getRetailersByMonth(dateRange as string);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/count-superstar-by-month', async (req: Request, res: Response, next: NextFunction) => {
+  const { dateRange = '' } = req.query;
+  try {
+    const response = await getCountOfSuperstar(dateRange as string);
     res.send({ data: response, success: true });
   } catch (error) {
     next(error);

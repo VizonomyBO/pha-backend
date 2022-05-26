@@ -550,15 +550,30 @@ export const getRetailersByMonthQuery = (dateRange: string) => {
   const [startDate, endDate] = dateRange.split(' - ');
   const query = `
     SELECT
-      FORMAT_DATE('%m-%Y', DATE(submission_date)) as month,
+      FORMAT_DATE('%m-%Y', DATE(update_date)) as month,
       count(*) as count
-      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
-      , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
     FROM ${PHA_RETAILER_TABLE}
-    WHERE submission_date >= TIMESTAMP('${startDate}')
-    AND submission_date <= TIMESTAMP('${endDate}')
+    WHERE update_date >= TIMESTAMP('${startDate}')
+    AND update_date <= TIMESTAMP('${endDate}')
     AND  submission_status = 'Approved'
     GROUP BY month
   `;
   return query;
 }
+
+export const countSuperstarByMonthQuery = (dateRange: string) => {
+  const [startDate, endDate] = dateRange.split(' - ');
+  const query = `
+    SELECT
+      FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
+      count(*) as count
+      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
+    FROM ${PHA_RETAILER_TABLE}
+    WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
+    AND superstar_badge_update <= TIMESTAMP('${endDate}')
+    AND  submission_status = 'Approved'
+    GROUP BY month
+  `;
+  return query;
+};
