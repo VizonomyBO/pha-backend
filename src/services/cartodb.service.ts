@@ -44,7 +44,8 @@ import {
   deleteUSDQuery,
   getDeleteUSDAPointQuery,
   updateSwitch,
-  getImagesQuery
+  getImagesQuery,
+  getRetailersByMonthQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -427,6 +428,19 @@ export const getIndividual = async (queryParams: QueryParams) => {
     throw error;
   }
 };
+
+export const getRetailersByMonth = async (dateRange: string) => {
+  logger.info("executing function: getRetailersByMonth");
+  const params = JSON.stringify(dateRange);
+  logger.debug(`with params: ${params}`);
+  try {
+    const query = getRetailersByMonthQuery(dateRange);
+    const response = await getRequestToCarto(query);
+    return response;
+  } catch(error) {
+    throw error;
+  }
+}
 
 export const getRetailer = async (queryParams: QueryParams) => {
   logger.info("executing function: getRetailer");

@@ -154,13 +154,13 @@ export const getIndividualQuery = (queryParams?: QueryParams) => {
 
 export const getRetailerQuery = (queryParams?: QueryParams) => {
   let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
-  if (queryParams) {
+ /* if (queryParams) {
     const {where, suffix} = generateWhereArray(queryParams);
     if (where.length) {
       query += ` WHERE ${where.join(' AND ')}`;
     }
     query += suffix;
-  }
+  }*/
   return query;
 };
 
@@ -543,5 +543,20 @@ export const approveQuery = (table: string, ids: string[]) => {
       update_date = TIMESTAMP('${update_date}'),
       submission_status = 'Approved'
     WHERE ${column} IN (${ids.map((a) => `'${a}'`).join(', ')});`;
+  return query;
+}
+
+export const getRetailersByMonthQuery = (dateRange: string) => {
+  const [startDate, endDate] = dateRange.split(' - ');
+  const query = `
+    SELECT
+      EXTRACT(MONTH FROM submission_date) as month,
+      count(*) as count
+    FROM ${PHA_INDIVIDUAL}
+    WHERE submission_date >= TIMESTAMP('${startDate}')
+    AND submission_date <= TIMESTAMP('${endDate}')
+    AND  submission_status = 'Approved'
+    GROUP BY month
+  `;
   return query;
 }
