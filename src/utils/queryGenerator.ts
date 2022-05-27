@@ -69,8 +69,8 @@ export const  buildFilterQueries = (filters: FiltersInterface) => {
 
 export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams) => {
   const fields = ['retailer_id', 'imagelinks', 'geom', 'name', 'address_1', 'city',
-    'update_date', 'superstar_badge_update',
-    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone', 'superstar_badge'];
+  'superstar_badge', 'update_date', 'superstar_badge_update',
+    'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit } = queryParams;
@@ -171,13 +171,13 @@ export const getIndividualQuery = (queryParams?: QueryParams) => {
 
 export const getRetailerQuery = (queryParams?: QueryParams) => {
   let query = `SELECT * FROM ${PHA_RETAILER_TABLE}`;
-  if (queryParams) {
+  /*if (queryParams) {
     const {where, suffix} = generateWhereArray(queryParams);
     if (where.length) {
       query += ` WHERE ${where.join(' AND ')}`;
     }
     query += suffix;
-  }
+  }*/
   return query;
 };
 
