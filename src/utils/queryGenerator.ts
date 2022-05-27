@@ -586,7 +586,7 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     SELECT
       FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
       count(*) as count
-      , COUNT((CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
       , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
     FROM ${PHA_RETAILER_TABLE}
     WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
