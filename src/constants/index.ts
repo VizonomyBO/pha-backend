@@ -8,6 +8,8 @@ export const REQUIRED_VARIABLES = {
 
 export const DOMAIN = '@localhost.com'
 export const CONNECTION_NAME = 'carto_dw';
+export const SUPERSTAR_UPDATES_TABLE = 'carto-dw-ac-j9wxt0nz.shared.superstar_updates';
+export const SUPERSTART_LAST_VALUE_TABLE = 'carto-dw-ac-j9wxt0nz.shared.superbadge_last_value';
 export const PHA_RETAILER_TABLE = 'carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered';
 export const RETAILERS_OSM = 'carto-dw-ac-j9wxt0nz.shared.2022_OpenStreetMap_Mississippi_clustered';
 export const RETAILERS_USDA = 'carto-dw-ac-j9wxt0nz.shared.USDA_Farmers_MS_clustered';

@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE, SUPERSTART_LAST_VALUE_TABLE, SUPERSTAR_UPDATES_TABLE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -586,9 +586,9 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     SELECT
       FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
       count(*) as count
-      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
-      , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
-    FROM ${PHA_RETAILER_TABLE}
+      , COUNT(CASE WHEN superstar_badge IS True THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN superstar_badge IS NOT True THEN 1 END) as no_superstar_badge_count
+    FROM ${SUPERSTAR_UPDATES_TABLE}
     WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
     AND superstar_badge_update <= TIMESTAMP('${endDate}')
     AND  submission_status = 'Approved'
@@ -597,10 +597,12 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
   return query;
 }
 
-export const automaicallySetSuperstarBadgeQuery = () => {
+export const  automaicallySetSuperstarBadgeQuery = () => {
   const query = `
-  UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
-  SET superstar_badge = 'Yes'
+  
+  UPDATE ${PHA_RETAILER_TABLE}
+  SET superstar_badge = 'Yes',
+  superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
   WHERE submission_status = 'Approved'
   AND manual IS NOT TRUE
   AND retailer_id IN (
@@ -625,13 +627,122 @@ export const automaicallySetSuperstarBadgeQuery = () => {
         SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
         SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
         retailer_id
-        FROM ${PHA_INDIVIDUAL}
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
         GROUP BY retailer_id) ) WHERE fresh_percentage >= 0.5
         AND acceptable_percentage >= 0.5
         AND visible_percentage >= 0.5
         AND local_percentage >= 0.5
       )
-    )
+    ); 
+    UPDATE ${PHA_RETAILER_TABLE}
+    SET superstar_badge = 'No',
+    superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage < 0.5
+        AND acceptable_percentage < 0.5
+        AND visible_percentage < 0.5
+        AND local_percentage < 0.5
+      )
+    );
+    INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
+    (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage < 0.5
+        AND acceptable_percentage < 0.5
+        AND visible_percentage < 0.5
+        AND local_percentage < 0.5
+      )
+    )  AND retailer_id NOT IN (
+      SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
+       WHERE last_value IS False);
+    INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
+    (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage >= 0.5
+        AND acceptable_percentage >= 0.5
+        AND visible_percentage >= 0.5
+        AND local_percentage >= 0.5
+      )
+    )  AND retailer_id NOT IN (
+      SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
+       WHERE last_value IS True);
+    MERGE INTO ${SUPERSTART_LAST_VALUE_TABLE} T
+    USING (SELECT retailer_id, superstar_badge as last_value FROM ${SUPERSTAR_UPDATES_TABLE}) S
+    ON (T.retailer_id = S.retailer_id)
+    WHEN MATCHED THEN UPDATE SET T.last_value = S.last_value
+    WHEN NOT MATCHED THEN INSERT (retailer_id, last_value) VALUES (S.retailer_id, S.last_value);
   `;
   return query;
 }
