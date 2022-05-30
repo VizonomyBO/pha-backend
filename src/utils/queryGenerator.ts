@@ -591,7 +591,6 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     FROM ${SUPERSTAR_UPDATES_TABLE}
     WHERE created_at >= TIMESTAMP('${startDate}')
     AND created_at <= TIMESTAMP('${endDate}')
-    AND  submission_status = 'Approved'
     GROUP BY month
   `;
   return query;
