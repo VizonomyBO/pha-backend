@@ -24,7 +24,7 @@ app.options('*', cors());
 app.use('/', router);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const task = cron.schedule('* * * * *', () => {
+const task = cron.schedule('0 * * * *', () => {
   logger.info('Running Cron Job');
   runSuperstarJob();
 });

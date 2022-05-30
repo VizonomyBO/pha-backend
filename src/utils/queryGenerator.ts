@@ -1,6 +1,6 @@
 import { PhaIndividual, PhaRetailer } from '@/@types/database';
 import { FiltersInterface, GoogleBbox, Propierties, QueryParams } from '../@types';
-import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE } from '../constants';
+import { DATA_SOURCES, PHA_INDIVIDUAL, PHA_RETAILER_TABLE, RETAILERS_OSM, RETAILERS_OSM_SOURCE, RETAILERS_PHA, RETAILERS_USDA, RETAILERS_USDA_SOURCE, SUPERSTART_LAST_VALUE_TABLE, SUPERSTAR_UPDATES_TABLE } from '../constants';
 
 const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
@@ -586,9 +586,9 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     SELECT
       FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
       count(*) as count
-      , COUNT(CASE WHEN superstar_badge = 'Yes' THEN 1 END) as superstar_badge_count
-      , COUNT(CASE WHEN superstar_badge != 'Yes' THEN 1 END) as no_superstar_badge_count
-    FROM ${PHA_RETAILER_TABLE}
+      , COUNT(CASE WHEN superstar_badge IS True THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN superstar_badge IS NOT True THEN 1 END) as no_superstar_badge_count
+    FROM ${SUPERSTAR_UPDATES_TABLE}
     WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
     AND superstar_badge_update <= TIMESTAMP('${endDate}')
     AND  submission_status = 'Approved'
@@ -600,7 +600,7 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
 export const  automaicallySetSuperstarBadgeQuery = () => {
   const query = `
   
-  UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+  UPDATE ${PHA_RETAILER_TABLE}
   SET superstar_badge = 'Yes',
   superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
   WHERE submission_status = 'Approved'
@@ -634,7 +634,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND local_percentage >= 0.5
       )
     ); 
-    UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    UPDATE ${PHA_RETAILER_TABLE}
     SET superstar_badge = 'No',
     superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
     WHERE submission_status = 'Approved'
@@ -668,7 +668,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND local_percentage < 0.5
       )
     );
-    INSERT INTO carto-dw-ac-j9wxt0nz.shared.superstar_updates
+    INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
     (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
     WHERE submission_status = 'Approved'
     AND manual IS NOT TRUE
@@ -700,8 +700,10 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND visible_percentage < 0.5
         AND local_percentage < 0.5
       )
-    );
-    INSERT INTO carto-dw-ac-j9wxt0nz.shared.superstar_updates
+    )  AND retailer_id NOT IN (
+      SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
+       WHERE last_value IS False);
+    INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
     (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
     WHERE submission_status = 'Approved'
     AND manual IS NOT TRUE
@@ -733,7 +735,14 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND visible_percentage >= 0.5
         AND local_percentage >= 0.5
       )
-    );
+    )  AND retailer_id NOT IN (
+      SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
+       WHERE last_value IS True);
+    MERGE INTO ${SUPERSTART_LAST_VALUE_TABLE} T
+    USING (SELECT retailer_id, superstar_badge as last_value FROM ${SUPERSTAR_UPDATES_TABLE}) S
+    ON (T.retailer_id = S.retailer_id)
+    WHEN MATCHED THEN UPDATE SET T.last_value = S.last_value
+    WHEN NOT MATCHED THEN INSERT (retailer_id, last_value) VALUES (S.retailer_id, S.last_value);
   `;
   return query;
 }
