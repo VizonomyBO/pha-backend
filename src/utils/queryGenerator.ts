@@ -584,13 +584,13 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
   const [startDate, endDate] = dateRange.split(' - ');
   const query = `
     SELECT
-      FORMAT_DATE('%m-%Y', DATE(superstar_badge_update)) as month,
+      FORMAT_DATE('%m-%Y', DATE(created_at)) as month,
       count(*) as count
       , COUNT(CASE WHEN superstar_badge IS True THEN 1 END) as superstar_badge_count
       , COUNT(CASE WHEN superstar_badge IS NOT True THEN 1 END) as no_superstar_badge_count
     FROM ${SUPERSTAR_UPDATES_TABLE}
-    WHERE superstar_badge_update >= TIMESTAMP('${startDate}')
-    AND superstar_badge_update <= TIMESTAMP('${endDate}')
+    WHERE created_at >= TIMESTAMP('${startDate}')
+    AND created_at <= TIMESTAMP('${endDate}')
     AND  submission_status = 'Approved'
     GROUP BY month
   `;
