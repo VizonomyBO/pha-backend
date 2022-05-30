@@ -597,10 +597,12 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
   return query;
 }
 
-export const automaicallySetSuperstarBadgeQuery = () => {
+export const  automaicallySetSuperstarBadgeQuery = () => {
   const query = `
+  
   UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
-  SET superstar_badge = 'Yes'
+  SET superstar_badge = 'Yes',
+  superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
   WHERE submission_status = 'Approved'
   AND manual IS NOT TRUE
   AND retailer_id IN (
@@ -625,13 +627,113 @@ export const automaicallySetSuperstarBadgeQuery = () => {
         SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
         SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
         retailer_id
-        FROM ${PHA_INDIVIDUAL}
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
         GROUP BY retailer_id) ) WHERE fresh_percentage >= 0.5
         AND acceptable_percentage >= 0.5
         AND visible_percentage >= 0.5
         AND local_percentage >= 0.5
       )
-    )
+    ); 
+    UPDATE carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    SET superstar_badge = 'No',
+    superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage < 0.5
+        AND acceptable_percentage < 0.5
+        AND visible_percentage < 0.5
+        AND local_percentage < 0.5
+      )
+    );
+    INSERT INTO carto-dw-ac-j9wxt0nz.shared.superstar_updates
+    (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage < 0.5
+        AND acceptable_percentage < 0.5
+        AND visible_percentage < 0.5
+        AND local_percentage < 0.5
+      )
+    );
+    INSERT INTO carto-dw-ac-j9wxt0nz.shared.superstar_updates
+    (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    WHERE submission_status = 'Approved'
+    AND manual IS NOT TRUE
+    AND retailer_id IN (
+      SELECT retailer_id FROM (
+      SELECT fresh_percentage,
+        acceptable_percentage,
+        visible_percentage,
+        local_percentage,
+        meets_need_percentage,
+        retailer_id FROM (
+        SELECT (fresh / total) AS fresh_percentage,
+        (acceptable / total) AS acceptable_percentage,
+        (visible / total) AS visible_percentage,
+        (local / total) AS local_percentage,
+        (meets_need / total) AS meets_need_percentage,
+        retailer_id
+        FROM (SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN availability = 'Fresh' THEN 1 ELSE 0 END) AS fresh,
+        SUM(CASE WHEN quality = 'Acceptable' THEN 1 ELSE 0 END) AS acceptable,
+        SUM(CASE WHEN visibility = 'Yes' THEN 1 ELSE 0 END) AS visible,
+        SUM(CASE WHEN local = 'Yes' THEN 1 ELSE 0 END) AS local,
+        SUM(CASE WHEN meets_need = 'Yes' THEN 1 ELSE 0 END) AS meets_need,
+        retailer_id
+        FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved'
+        GROUP BY retailer_id) ) WHERE fresh_percentage >= 0.5
+        AND acceptable_percentage >= 0.5
+        AND visible_percentage >= 0.5
+        AND local_percentage >= 0.5
+      )
+    );
   `;
   return query;
 }
