@@ -648,7 +648,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
     superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
     WHERE submission_status = 'Approved'
     AND manual IS NOT TRUE
-    AND retailer_id IN (
+    AND (retailer_id IN (
       SELECT retailer_id FROM (
       SELECT fresh_percentage,
         acceptable_percentage,
@@ -676,12 +676,12 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND visible_percentage < 0.5
         AND local_percentage < 0.5
       )
-    );
+    ) OR (retailer_id NOT IN (SELECT retailer_id FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved')));
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
     (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
     WHERE submission_status = 'Approved'
     AND manual IS NOT TRUE
-    AND retailer_id IN (
+    AND (retailer_id IN (
       SELECT retailer_id FROM (
       SELECT fresh_percentage,
         acceptable_percentage,
@@ -709,7 +709,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
         AND visible_percentage < 0.5
         AND local_percentage < 0.5
       )
-    )  AND retailer_id NOT IN (
+    ) OR retailer_id NOT IN (SELECT retailer_id FROM ${PHA_INDIVIDUAL}) WHERE submission_status='Approved') AND retailer_id NOT IN (
       SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
        WHERE last_value IS False);
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
