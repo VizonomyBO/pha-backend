@@ -67,7 +67,7 @@ export const buildFilterQueries = (filters: FiltersInterface) => {
       queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
       if (dataSource === RETAILERS_PHA) {
         const superYes = "(superstar_badge = 'Yes')";
-        const superNo = "(superstar_badge = 'No')";
+        const superNo = "(superstar_badge != 'Yes')";
         const specialSuffix = suffix.length ? `${suffix} AND ${superYes}` : `WHERE ${superYes}`;
         queries[`${dataSource}-superstar_yes`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix}`;
         queries[`${dataSource}-superstar_no`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix.replace(superYes, superNo)}`;
