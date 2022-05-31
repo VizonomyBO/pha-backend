@@ -62,6 +62,10 @@ const schema: JSONSchemaType<FiltersInterface> = {
         }
       },
       required: ['xmin', 'ymin', 'xmax', 'ymax']
+    },
+    superstar_badge: {
+      type: 'string',
+      nullable: true
     }
   },
   required: ['categories', 'accesibility', 'badges', 'dataSources']
