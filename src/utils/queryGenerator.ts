@@ -613,6 +613,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
   SET superstar_badge = 'Yes',
   superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
   WHERE submission_status = 'Approved'
+  AND permanently_closed != 'Yes'
   AND manual IS NOT TRUE
   AND retailer_id IN (
       SELECT retailer_id FROM (
@@ -647,6 +648,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
     SET superstar_badge = 'No',
     superstar_badge_update = TIMESTAMP('${new Date().toISOString()}') 
     WHERE submission_status = 'Approved'
+    AND permanently_closed != 'Yes'
     AND manual IS NOT TRUE
     AND (retailer_id IN (
       SELECT retailer_id FROM (
@@ -680,6 +682,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
     (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
     WHERE submission_status = 'Approved'
+    AND permanently_closed != 'Yes'
     AND manual IS NOT TRUE
     AND (retailer_id IN (
       SELECT retailer_id FROM (
@@ -715,6 +718,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
     (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
     WHERE submission_status = 'Approved'
+    AND permanently_closed != 'Yes'
     AND manual IS NOT TRUE
     AND retailer_id IN (
       SELECT retailer_id FROM (
