@@ -47,4 +47,5 @@ export interface FiltersInterface {
   verifiedDateRange?: string[],
   superstarDateRange?: string[],
   bbox?: GoogleBbox
+  superstar_badge?: string,
 };
