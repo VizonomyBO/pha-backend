@@ -680,7 +680,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
       )
     ) OR (retailer_id NOT IN (SELECT retailer_id FROM ${PHA_INDIVIDUAL} WHERE submission_status = 'Approved')));
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
-    (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    (superstar_badge, created_at, retailer_id) SELECT FALSE as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  ${PHA_RETAILER_TABLE}
     WHERE submission_status = 'Approved'
     AND permanently_closed != 'Yes'
     AND manual IS NOT TRUE
@@ -716,7 +716,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
       SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
        WHERE last_value IS False);
     INSERT INTO ${SUPERSTAR_UPDATES_TABLE}
-    (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  carto-dw-ac-j9wxt0nz.shared.pha_retailer_clustered
+    (superstar_badge, created_at, retailer_id) SELECT True as super_star_badge, TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id FROM  ${PHA_RETAILER_TABLE}
     WHERE submission_status = 'Approved'
     AND permanently_closed != 'Yes'
     AND manual IS NOT TRUE
@@ -751,8 +751,32 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
     )  AND retailer_id NOT IN (
       SELECT retailer_id FROM ${SUPERSTART_LAST_VALUE_TABLE}
        WHERE last_value IS True);
+    INSERT INTO 
+       ${SUPERSTAR_UPDATES_TABLE}
+       (superstar_badge, created_at, retailer_id) 
+       SELECT 
+       CASE WHEN superstar_badge = 'Yes' THEN True WHEN superstar_badge != 'Yes' THEN False END  as super_star_badge, 
+       TIMESTAMP('2022-06-01T14:18:00.916Z') as created_at, retailer_id 
+       FROM  ${PHA_RETAILER_TABLE}
+       WHERE submission_status = 'Approved'
+       AND permanently_closed != 'Yes'
+       AND manual IS true
+       AND retailer_id NOT IN (
+         SELECT a.retailer_id 
+         FROM 
+         ${SUPERSTART_LAST_VALUE_TABLE} a, 
+         ${PHA_RETAILER_TABLE} b
+           WHERE a.last_value 
+           =
+           CASE 
+             WHEN b.superstar_badge = 'Yes' THEN True 
+             WHEN b.superstar_badge != 'Yes' THEN False 
+           END
+           and b.retailer_id = a.retailer_id
+       );
     MERGE INTO ${SUPERSTART_LAST_VALUE_TABLE} T
-    USING (SELECT retailer_id, superstar_badge as last_value FROM ${SUPERSTAR_UPDATES_TABLE}) S
+    USING (SELECT retailer_id, CASE WHEN superstar_badge = 'Yes' THEN True WHEN superstar_badge != 'Yes' THEN False END  as last_value FROM ${PHA_RETAILER_TABLE} WHERE 
+    submission_status='Approved' AND permanently_closed != 'Yes') S
     ON (T.retailer_id = S.retailer_id)
     WHEN MATCHED THEN UPDATE SET T.last_value = S.last_value
     WHEN NOT MATCHED THEN INSERT (retailer_id, last_value) VALUES (S.retailer_id, S.last_value);
