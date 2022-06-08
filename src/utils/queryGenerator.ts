@@ -195,7 +195,7 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
   const individualQuery = getIndividualQuery();
   const retailerQuery = getRetailerQuery();
   const fieldsToReturn = `retailer_id, name, submission_date, submission_status, address_1, contact_name,
-  contact_email, permanently_closed`;
+  contact_email, permanently_closed, manual`;
   const {where: whereArray, suffix} = generateWhereArray(queryParams);
   let where = '';
   if (whereArray.length) {
@@ -217,7 +217,8 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
       NULL as wic_accepted,
       NULL as snap_accepted,
       osm_timestamp as submission_date,
-      NULL as phone
+      NULL as phone,
+      NULL as manual
     FROM ${RETAILERS_OSM}
     UNION ALL
     SELECT
@@ -232,7 +233,8 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
       NULL as wic_accepted,
       NULL as snap_accepted,
       submission_date2 as submission_date,
-      NULL as phone
+      NULL as phone,
+      NULL AS manual
     FROM ${RETAILERS_USDA}`;
     const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${queryParams.limit} OFFSET ${(queryParams.page - 1) * queryParams.limit}`;
     const auxQuery = `WITH aux AS (${unionQuery})
