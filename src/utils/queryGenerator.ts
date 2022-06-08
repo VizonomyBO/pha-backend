@@ -264,7 +264,7 @@ export const generateWhereArray = (queryParams: QueryParams) => {
   const where: string[] = [`submission_status != 'Deleted'`];
   if (search) {
     const upperSearch = search.toUpperCase();
-    where.push(`UPPER(name) LIKE '%${upperSearch}%'`);
+    where.push(`(UPPER(name) LIKE '%${upperSearch}%' OR zipcode like '%${upperSearch}%')`);
   }
   if (status) {
     where.push(`submission_status IN (${status.split(',').map(s => `'${s}'`).join(',')})`);
