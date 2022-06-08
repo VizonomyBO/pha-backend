@@ -758,7 +758,7 @@ export const  automaicallySetSuperstarBadgeQuery = () => {
        (superstar_badge, created_at, retailer_id) 
        SELECT 
        CASE WHEN superstar_badge = 'Yes' THEN True WHEN superstar_badge != 'Yes' THEN False END  as super_star_badge, 
-       TIMESTAMP(${new Date().toISOString()}) as created_at, retailer_id 
+       TIMESTAMP('${new Date().toISOString()}') as created_at, retailer_id 
        FROM  ${PHA_RETAILER_TABLE}
        WHERE submission_status = 'Approved'
        AND permanently_closed != 'Yes'
