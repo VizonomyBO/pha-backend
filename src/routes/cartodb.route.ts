@@ -387,10 +387,11 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
 router.post('/map-table', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const mapTable = body as FiltersInterface;
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, dateRange = '' } = req.query;
   const params = {
     page: +page,
     limit: +limit,
+    dateRange: dateRange as string,
   } as QueryParams;
   try {
     const data = await mapQuery(mapTable, params);

@@ -83,7 +83,8 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
-  const { page, limit } = queryParams;
+  const { page, limit, dateRange } = queryParams;
+  const [startDate, endDate] = dateRange.split(' - ');
   const offset = (page - 1) * limit;
   const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
@@ -127,7 +128,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('superstar_badge_update', "NULL as superstar_badge_update");
     }
     if (source === RETAILERS_PHA) {
-      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where})`);
+      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where} AND (update_date >= TIMESTAMP('${startDate}') AND update_date <= TIMESTAMP('${endDate}')))`);
     } else {
       if (filters.bbox) {
         const bboxWhere = `WHERE ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`;
