@@ -29,7 +29,9 @@ import {
   updateSwitchColumn,
   getImagesFromIndividual,
   getRetailersByMonth,
-  getCountOfSuperstar
+  getCountOfSuperstar,
+  findRetailersByMonth,
+  findCountOfSuperstar
 } from '../services/cartodb.service';
 import { FiltersInterface, MulterFile, QueryParams, RequestWithFiles } from '../@types';
 import { filtersMiddleware } from '../middlewares/filtersMiddleware';
@@ -228,10 +230,32 @@ router.get('/count-retailers-by-month', async (req: Request, res: Response, next
   }
 });
 
+router.post('/count-retailers-by-month', async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const filter = body as FiltersInterface;
+  try {
+    const response = await findRetailersByMonth(filter);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/count-superstar-by-month', async (req: Request, res: Response, next: NextFunction) => {
   const { dateRange = '' } = req.query;
   try {
     const response = await getCountOfSuperstar(dateRange as string);
+    res.send({ data: response, success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/count-superstar-by-month', async (req: Request, res: Response, next: NextFunction) => {
+  const { body } = req;
+  const filter = body as FiltersInterface;
+  try {
+    const response = await findCountOfSuperstar(filter);
     res.send({ data: response, success: true });
   } catch (error) {
     next(error);
