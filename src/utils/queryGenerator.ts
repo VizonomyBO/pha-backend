@@ -594,6 +594,19 @@ export const getRetailersByMonthQuery = (dateRange: string) => {
   return query;
 }
 
+export const findRetailersByMonthQuery = (filters: FiltersInterface) => {
+  const where = whereFilterQueries(filters, RETAILERS_PHA);
+  const query = `
+    SELECT
+      FORMAT_DATE('%m-%Y', DATE(update_date)) as month,
+      count(*) as count
+    FROM ${PHA_RETAILER_TABLE}
+    ${where}
+    GROUP BY month
+  `;
+  return query;
+}
+
 export const countSuperstarByMonthQuery = (dateRange: string) => {
   const [startDate, endDate] = dateRange.split(' - ');
   const query = `
@@ -605,6 +618,51 @@ export const countSuperstarByMonthQuery = (dateRange: string) => {
     FROM ${SUPERSTAR_UPDATES_TABLE}
     WHERE created_at >= TIMESTAMP('${startDate}')
     AND created_at <= TIMESTAMP('${endDate}')
+    GROUP BY month
+  `;
+  return query;
+}
+
+export const findSuperstarByMonthQuery = (filters: FiltersInterface) => {
+  const where: string[][] = [];
+  if (filters.verifiedDateRange) {
+    where.push(
+      [`update_date >= TIMESTAMP('${filters.verifiedDateRange[0]}') 
+      AND update_date <= TIMESTAMP('${filters.verifiedDateRange[1]}')`]
+    );
+  }
+  if (filters.categories) {
+    const row: string[] = [];
+    filters.categories.forEach(category => {
+      row.push(`rt.${category} = 'Yes'`);
+    });
+    if (row.length) {
+      where.push(row);
+    }
+  }
+  if (filters.accesibility) {
+    const row: string[] = [];
+    filters.accesibility.forEach(accessibility => {
+      row.push(`rt.${accessibility} = 'Yes'`);
+    });
+    if (row.length) {
+      where.push(row);
+    }
+  }
+  let suffix = '';
+  if (where.length) {
+    const rows = where.map(row => `(${row.join(' OR ')})`);
+    suffix = `WHERE ${rows.join(' AND ')}`;
+  }
+  const query = `
+    SELECT
+      FORMAT_DATE('%m-%Y', DATE(st.created_at)) as month,
+      count(*) as count
+      , COUNT(CASE WHEN st.superstar_badge IS True THEN 1 END) as superstar_badge_count
+      , COUNT(CASE WHEN st.superstar_badge IS NOT True THEN 1 END) as no_superstar_badge_count
+    FROM ${SUPERSTAR_UPDATES_TABLE} st INNER JOIN ${PHA_RETAILER_TABLE} rt
+    ON st.retailer_id = rt.retailer_id
+    ${suffix}
     GROUP BY month
   `;
   return query;

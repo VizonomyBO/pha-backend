@@ -47,7 +47,9 @@ import {
   getImagesQuery,
   getRetailersByMonthQuery,
   countSuperstarByMonthQuery,
-  automaicallySetSuperstarBadgeQuery
+  automaicallySetSuperstarBadgeQuery,
+  findRetailersByMonthQuery,
+  findSuperstarByMonthQuery
 } from '../utils/queryGenerator';
 import { deleteGoogleFiles } from '../utils';
 import DownloadService from './Download.service';
@@ -444,12 +446,36 @@ export const getRetailersByMonth = async (dateRange: string) => {
   }
 }
 
+export const findRetailersByMonth = async (filters: FiltersInterface) => {
+  logger.info("executing function: findRetailersByMonth");
+  logger.debug(`with params: ${filters}`);
+  try {
+    const query = findRetailersByMonthQuery(filters);
+    const response = await getRequestToCarto(query);
+    return response;
+  } catch(error) {
+    throw error;
+  }
+}
+
 export const getCountOfSuperstar = async (dateRange: string) => {
   logger.info("executing function: getCountOfSuperstar");
   const params = JSON.stringify(dateRange);
   logger.debug(`with params: ${params}`);
   try {
     const query = countSuperstarByMonthQuery(dateRange);
+    const response = await getRequestToCarto(query);
+    return response;
+  } catch(error) {
+    throw error;
+  }
+}
+
+export const findCountOfSuperstar = async (filters: FiltersInterface) => {
+  logger.info("executing function: findCountOfSuperstar");
+  logger.debug(`with params: ${filters}`);
+  try {
+    const query = findSuperstarByMonthQuery(filters);
     const response = await getRequestToCarto(query);
     return response;
   } catch(error) {
