@@ -387,19 +387,36 @@ router.put('/pha-retailer/:id', async (req: RequestWithFiles, res: Response, nex
 router.post('/map-table', [filtersMiddleware], async (req: Request, res: Response, next: NextFunction) => {
   const { body } = req;
   const mapTable = body as FiltersInterface;
-  const { page = 1, limit = 10, dateRange = '' } = req.query;
-  const params = {
-    page: +page,
-    limit: +limit,
-    dateRange: dateRange as string,
-  } as QueryParams;
-  try {
-    const data = await mapQuery(mapTable, params);
-    res.send({ data: data, success: true });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  if (req.query.dateRange) {
+    const { page = 1, limit = 10, dateRange = '' } = req.query;
+    const params = {
+      page: +page,
+      limit: +limit,
+      dateRange: dateRange as string,
+    } as QueryParams;
+    try {
+      const data = await mapQuery(mapTable, params);
+      res.send({ data: data, success: true });
+    } catch (error) {
+      console.log(error);
+      next(error);
   }
+  } else {
+    const { page = 1, limit = 10 } = req.query;
+    const params = {
+      page: +page,
+      limit: +limit,
+      dateRange: '2022-05-01T00:00:00.000Z - 2023-12-23T00:00:00.000Z' as string,
+    } as QueryParams;
+    try {
+      const data = await mapQuery(mapTable, params);
+      res.send({ data: data, success: true });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  
 });
 
 router.delete('/osm-point/:id', async (req: Request, res: Response, next: NextFunction) => {
