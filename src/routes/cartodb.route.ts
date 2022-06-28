@@ -412,11 +412,12 @@ router.post('/map-table', [filtersMiddleware], async (req: Request, res: Respons
   const { body } = req;
   const mapTable = body as FiltersInterface;
   if (req.query.dateRange) {
-    const { page = 1, limit = 10, dateRange = '' } = req.query;
+    const { page = 1, limit = 10, dateRange = '', search = '' } = req.query;
     const params = {
       page: +page,
       limit: +limit,
       dateRange: dateRange as string,
+      search: search as string,
     } as QueryParams;
     try {
       const data = await mapQuery(mapTable, params);
