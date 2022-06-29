@@ -7,11 +7,18 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   return `POLYGON((${minLng} ${minLat}, ${minLng} ${maxLat}, ${maxLng} ${maxLat}, ${maxLng} ${minLat}, ${minLng} ${minLat}))`;
 };
 export const whereSearch = (search: string, who?: string) => {
+  const searchValue = search.replace('%20', ' ');
   let where: string = '';
-  const upperSearch = search.toUpperCase();
-  const lowerSearch = search.toLowerCase();
+  const upperSearch = searchValue.toUpperCase();
+  const lowerSearch = searchValue.toLowerCase();
   if (who === RETAILERS_PHA) {
-    where = `AND (address_1 like '%${search}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
+    where = `AND (address_1 like '%${searchValue}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
+  }
+  if (who === RETAILERS_USDA_SOURCE) {
+    where = `WHERE (location_address like '%${searchValue}%' OR location_address like '%${upperSearch}%' OR location_address like '%${lowerSearch}%')`;
+  }
+  if (who === RETAILERS_OSM_SOURCE) {
+    where = `WHERE (address like '%${searchValue}%' OR address like '%${upperSearch}%' OR address like '%${lowerSearch}%')`;
   }
   return where;
 };
@@ -93,11 +100,11 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
   const { page, limit, dateRange, search } = queryParams;
-  const whereSearchValue = whereSearch(search, RETAILERS_PHA);
   const [startDate, endDate] = dateRange.split(' - ');
   const offset = (page - 1) * limit;
   const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${limit + 1} OFFSET ${offset}`;
   filters.dataSources.forEach(source => {
+    const whereSearchValue = whereSearch(search, source);
     let finalFields = '';
     if (source === RETAILERS_PHA) {
       finalFields = fields.join(`,`);
@@ -142,9 +149,9 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     } else {
       if (filters.bbox) {
         const bboxWhere = `WHERE ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`;
-        queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${bboxWhere})`);
+        queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${bboxWhere} ${whereSearchValue})`);
       } else {
-        queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]}`);
+        queries.push(`SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${whereSearchValue}`);
       }
     }
   });
