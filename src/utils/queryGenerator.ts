@@ -7,11 +7,12 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   return `POLYGON((${minLng} ${minLat}, ${minLng} ${maxLat}, ${maxLng} ${maxLat}, ${maxLng} ${minLat}, ${minLng} ${minLat}))`;
 };
 export const whereSearch = (search: string, who?: string) => {
+  const searchValue = search.replace('%20', ' ');
   let where: string = '';
-  const upperSearch = search.toUpperCase();
-  const lowerSearch = search.toLowerCase();
+  const upperSearch = searchValue.toUpperCase();
+  const lowerSearch = searchValue.toLowerCase();
   if (who === RETAILERS_PHA) {
-    where = `AND (address_1 like '%${search}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
+    where = `AND (address_1 like '%${searchValue}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
   }
   return where;
 };
