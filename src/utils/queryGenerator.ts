@@ -6,6 +6,15 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
   const {xmin: minLng, ymin: minLat, xmax: maxLng, ymax: maxLat} = bbox;
   return `POLYGON((${minLng} ${minLat}, ${minLng} ${maxLat}, ${maxLng} ${maxLat}, ${maxLng} ${minLat}, ${minLng} ${minLat}))`;
 };
+export const whereSearch = (search: string, who?: string) => {
+  let where: string = '';
+  const upperSearch = search.toUpperCase();
+  const lowerSearch = search.toLowerCase();
+  if (who === RETAILERS_PHA) {
+    where = `AND (address_1 like '%${search}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
+  }
+  return where;
+};
 export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
   const where: string[][] = [];
   if (who === RETAILERS_PHA) {
@@ -83,7 +92,8 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
     'state', 'zipcode', 'wic_accepted', 'snap_accepted', 'submission_status', 'submission_date', 'snap_option', 'phone'];
   const where = whereFilterQueries(filters, RETAILERS_PHA);
   const queries: string[] = [];
-  const { page, limit, dateRange } = queryParams;
+  const { page, limit, dateRange, search } = queryParams;
+  const whereSearchValue = whereSearch(search, RETAILERS_PHA);
   const [startDate, endDate] = dateRange.split(' - ');
   const offset = (page - 1) * limit;
   const limitQuery = ` ORDER BY submission_date DESC, name DESC LIMIT ${limit + 1} OFFSET ${offset}`;
@@ -128,7 +138,7 @@ export const getMapQuery = (filters: FiltersInterface, queryParams: QueryParams)
       finalFields = finalFields.replace('superstar_badge_update', "NULL as superstar_badge_update");
     }
     if (source === RETAILERS_PHA) {
-      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where} AND (update_date >= TIMESTAMP('${startDate}') AND update_date <= TIMESTAMP('${endDate}')))`);
+      queries.push(`(SELECT ${finalFields}, '${source}' as source FROM ${DATA_SOURCES[source]} ${where} AND (update_date >= TIMESTAMP('${startDate}') AND update_date <= TIMESTAMP('${endDate}')) ${whereSearchValue})`);
     } else {
       if (filters.bbox) {
         const bboxWhere = `WHERE ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`;
