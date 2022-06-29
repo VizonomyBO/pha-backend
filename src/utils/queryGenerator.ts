@@ -75,18 +75,19 @@ export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
 export const buildFilterQueries = (filters: FiltersInterface) => {
   const queries = {};
   filters.dataSources.forEach(dataSource => {
+    const whereSearchValue = whereSearch(filters.search ? filters.search : '', dataSource);
     const suffix = whereFilterQueries(filters, dataSource);
     if (dataSource === RETAILERS_OSM_SOURCE) {
-      queries[dataSource] = `SELECT * REPLACE(ST_CENTROID(geom) AS geom) FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
+      queries[dataSource] = `SELECT * REPLACE(ST_CENTROID(geom) AS geom) FROM ${DATA_SOURCES[dataSource]} ${suffix} ${whereSearchValue}`;
     }
     else {
-      queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix}`;
+      queries[dataSource] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${suffix} ${whereSearchValue}`;
       if (dataSource === RETAILERS_PHA) {
         const superYes = "(superstar_badge = 'Yes')";
         const superNo = "(superstar_badge != 'Yes')";
         const specialSuffix = suffix.length ? `${suffix} AND ${superYes}` : `WHERE ${superYes}`;
-        queries[`${dataSource}-superstar_yes`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix}`;
-        queries[`${dataSource}-superstar_no`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix.replace(superYes, superNo)}`;
+        queries[`${dataSource}-superstar_yes`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix} ${whereSearchValue}`;
+        queries[`${dataSource}-superstar_no`] = `SELECT * FROM ${DATA_SOURCES[dataSource]} ${specialSuffix.replace(superYes, superNo)} ${whereSearchValue}`;
       }
     }
   });
