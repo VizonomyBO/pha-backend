@@ -66,7 +66,11 @@ const schema: JSONSchemaType<FiltersInterface> = {
     superstar_badge: {
       type: 'string',
       nullable: true
-    }
+    },
+    search: {
+      type: 'string',
+      nullable: true
+    },
   },
   required: ['categories', 'accesibility', 'badges', 'dataSources']
 };
