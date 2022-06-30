@@ -9,16 +9,18 @@ const bboxGoogleToGooglePolygon = (bbox: GoogleBbox) => {
 export const whereSearch = (search: string, who?: string) => {
   const searchValue = search.replace('%20', ' ');
   let where: string = '';
-  const upperSearch = searchValue.toUpperCase();
-  const lowerSearch = searchValue.toLowerCase();
-  if (who === RETAILERS_PHA) {
-    where = `AND (address_1 like '%${searchValue}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
-  }
-  if (who === RETAILERS_USDA_SOURCE) {
-    where = `WHERE (location_address like '%${searchValue}%' OR location_address like '%${upperSearch}%' OR location_address like '%${lowerSearch}%')`;
-  }
-  if (who === RETAILERS_OSM_SOURCE) {
-    where = `WHERE (address like '%${searchValue}%' OR address like '%${upperSearch}%' OR address like '%${lowerSearch}%')`;
+  if (search !== '') {
+    const upperSearch = searchValue.toUpperCase();
+    const lowerSearch = searchValue.toLowerCase();
+    if (who === RETAILERS_PHA) {
+      where = `AND (address_1 like '%${searchValue}%' OR address_1 like '%${upperSearch}%' OR address_1 like '%${lowerSearch}%')`;
+    }
+    if (who === RETAILERS_USDA_SOURCE) {
+      where = `WHERE (location_address like '%${searchValue}%' OR location_address like '%${upperSearch}%' OR location_address like '%${lowerSearch}%')`;
+    }
+    if (who === RETAILERS_OSM_SOURCE) {
+      where = `WHERE (address like '%${searchValue}%' OR address like '%${upperSearch}%' OR address like '%${lowerSearch}%')`;
+    }
   }
   return where;
 };
