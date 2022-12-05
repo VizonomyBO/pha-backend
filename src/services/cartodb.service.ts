@@ -257,6 +257,7 @@ export const getOAuthToken = async (): Promise<string> => {
     return response.data.access_token;
   } catch (error) {
     if (error.response.status == 401) {
+      console.error('Error authentication', error);
       throw new AuthenticationError('Cannot get CARTO credentials.');
     }
     throw error.response.data.error;
