@@ -41,7 +41,7 @@ class DownloadService {
     const returnStream = createReadStream(outputPath);
     returnStream.pipe(res);
     returnStream.on('close', () => {
-      console.log('finished');
+      // console.log('finished');
       rmSync(folderPath, { recursive: true, force: true });
       rmSync(outputPath);
     });

@@ -67,7 +67,7 @@ export const whereFilterQueries = (filters: FiltersInterface, who?: string) => {
     where.push([`ST_CONTAINS(ST_GEOGFROMTEXT('${bboxGoogleToGooglePolygon(filters.bbox)}'), geom)`]);
   }
   if (where.length) {
-    console.log(where);
+    // console.log(where);
     const rows = where.map(row => `(${row.join(' OR ')})`);
     suffix = `WHERE ${rows.join(' AND ')}`;
   }
@@ -224,7 +224,7 @@ export const getDashboardQuery = (queryParams: QueryParams) => {
   }
   let query = `SELECT ${fieldsToReturn}, superstar_badge, zipcode, manual FROM (${retailerQuery})
     ${where} ORDER BY submission_date DESC ${suffix}`;
-  console.log(queryParams);
+  // console.log(queryParams);
   if (queryParams.isUnvalidated) {
     const unionQuery = `SELECT
       name,

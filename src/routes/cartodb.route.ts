@@ -349,7 +349,7 @@ router.post('/pha-retailer', async (req: RequestWithFiles, res: Response, next: 
     const data = await insertIntoPHARetailer(retailer, isUnvalidated);
     res.send({ data: data, success: true });
   } catch (error) {
-    console.log('here');
+    // console.log('here');
     next(error);
   }
 });
